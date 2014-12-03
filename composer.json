@@ -1,6 +1,6 @@
 {
     "name":"samsonos/cms_app_materialtable",
-    "description":"SamsonCMS MaterialTable application",
+    "description":"SamsonCMS MaterialTable application ",
     "author":"Maxim Omelchenko <omelchenko@samsonos.com>",
     "require":{
         "samsonos/cms_app":"*",
