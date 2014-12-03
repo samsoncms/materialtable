@@ -1,4 +1,4 @@
-<table class="__samsoncms_table related_material_table">
+<table class="__samsoncms_table material_table_table">
     <thead>
     <tr>
         <th class="name"><?php t('Url')?></th>

@@ -34,7 +34,7 @@ class MaterialTableTable extends \samson\cms\table\Table
 //     */
 //    private $structures = array();
 
-    public function __construct(\samson\cms\CMSMaterial & $material, \samson\cms\Navigation & $structure, $locale = 'ru')
+    public function __construct(\samson\cms\CMSMaterial & $material, $structureId, $locale = 'ru')
     {
         // Retrieve pointer to current module for rendering
         $this->renderModule = & s()->module($this->renderModule);
@@ -52,9 +52,12 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('material.Draft', 0)
             ->fieldsNew('MaterialID');
 
-        $structureFields = $structure->fields();
+        dbQuery('field')->join('structurefield')->cond('StructureID', $structureId)->exec($structureFields);
 
         foreach ($structureFields as $field) {
+
+            $this->fields[$field->id] = $field;
+
             foreach ($tableMaterialIds as $materialId) {
                 if (!dbQuery('materialfield')
                     ->cond('MaterialID', $materialId)
@@ -77,11 +80,11 @@ class MaterialTableTable extends \samson\cms\table\Table
 
         // Get all child materials material fields for this locale
         $this->query = dbQuery('material')
-            ->cond('parent_id', $this->material->id)
-            ->cond('type', 3)
+            ->cond('material.parent_id', $this->material->id)
+            ->cond('material.type', 3)
             ->join('materialfield')
-            ->cond('materialfield_FieldID', array_keys($this->fields))
-            ->cond('materialfield_locale', $this->locale);
+            ->cond('materialfield.FieldID', array_keys($this->fields))
+            ->cond('materialfield.locale', $this->locale);
 
         // Constructor treed
         parent::__construct( $this->query );
@@ -135,17 +138,18 @@ class MaterialTableTable extends \samson\cms\table\Table
         $rows = '';
 
         // if no rows data is passed - perform db request
-        if( !isset($db_rows) )	$db_rows = $this->query->exec();
+        if(!isset($db_rows)) {
+            $this->query->exec($db_rows);
+        }
 
         // If we have table rows data
-        if( is_array($db_rows ) )
-        {
+        if( is_array($db_rows ) ) {
+
             // Save quantity of rendering rows
             $this->last_render_count = sizeof($db_rows);
 
             // Iterate db data and perform rendering
-            foreach( $db_rows as & $db_row )
-            {
+            foreach( $db_rows as & $db_row ) {
                 $rows .= $this->row( $db_row, $this->pager );
             }
         }

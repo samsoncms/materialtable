@@ -114,9 +114,9 @@ class App extends \samson\cms\App
     public function getMaterialTableTable($materialId, $structureId, $locale = '')
     {
         /** @var \samson\cms\CMSMaterial $material */
-        $material = dbQuery('\samson\cms\CMSMaterial')->cond('id', $materialId)->first();
+        $material = dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first();
 
-        $table = new MaterialTableTable($material, $locale);
+        $table = new MaterialTableTable($material, $structureId, $locale);
 
         $all = false;
         $multilingual = false;
@@ -128,14 +128,12 @@ class App extends \samson\cms\App
             ->first()) {
 
             // Check with locales we have in fields table
-            if (dbQuery('structurefield')->join('field')->cond('field_local', 0)->cond('StructureID',
-                $structureId)->first()
-            ) {
+            if (dbQuery('structurefield')->cond('StructureID', $structureId)
+                ->join('field')->cond('field_local', 0)->first()) {
                 $all = true;
             }
-            if (dbQuery('structurefield')->join('field')->cond('field_local', 1)->cond('StructureID',
-                $structureId)->first()
-            ) {
+            if (dbQuery('structurefield')->cond('StructureID', $structureId)
+                ->join('field')->cond('field_local', 1)->first()) {
                 $multilingual = true;
             }
         }
@@ -146,7 +144,6 @@ class App extends \samson\cms\App
                 ->set('currentID', $materialId)
                 ->output();
         }
-
         return '';
     }
 }

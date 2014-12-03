@@ -37,6 +37,7 @@ class MaterialTableTab extends FormTab
      */
     public function __construct( \samson\cms\web\material\Form & $form, $structureId, FormTab & $parent = null, $locale = null )
     {
+//        var_dump(1);
         // Call parent constructor
         parent::__construct( $form, $parent );
 

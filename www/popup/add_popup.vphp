@@ -1,12 +1,13 @@
-<div class="add_related_popup">
+<div class="add_material_table_popup">
     <span class="close-button">X</span>
 
     <div>
-        <form action="<?php url_base('related_material/add', 'related_material/table', 'parentID') ?>" method="post" class="add_related_form">
+        <form action="<?php url_base('material_table/add', 'material_table/table', 'parentID') ?>" method="post" class="add_material_table_form">
             <?php t('Url:') ?>
             <br>
             <input type="text" required name="Url" placeholder="<?php t('Url-адрес') ?>">
-            <input type="hidden" name="parent_id" value="<?php v('parentID') ?>">
+            <input type="hidden" name="material_id" value="<?php v('materialId') ?>">
+            <input type="hidden" name="structure_id" value="<?php v('structureId') ?>">
             <input type="submit" value="<?php t('Создать') ?>">
         </form>
     </div>
