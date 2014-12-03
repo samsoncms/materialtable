@@ -1,0 +1,18 @@
+{
+    "name":"samsonos/cms_app_materialtable",
+    "description":"SamsonCMS MaterialTable application",
+    "author":"Maxim Omelchenko <omelchenko@samsonos.com>",
+    "require":{
+        "samsonos/cms_app":"*",
+        "samsonos/cms_table":"*",
+        "samsonos/cms_app_material":"*"
+    },
+    "license":"Open Software License (OSL) v 3.0",
+    "homepage":"http://samsonos.com/",
+    "autoload": {
+        "classmap": ["src/"],
+        "psr-0": {
+            "samson\\cms\\web\\materialtable": "src/"
+        }
+    }
+}

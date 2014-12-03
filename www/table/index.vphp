@@ -1,0 +1,12 @@
+<table class="__samsoncms_table related_material_table">
+    <thead>
+    <tr>
+        <th class="name"><?php t('Url')?></th>
+        <?php v('thView') ?>
+        <th>
+            <?php t('Удаление') ?>
+        </th>
+    </tr>
+    </thead>
+    <tbody><?php v('rows'); ?></tbody>
+</table>
