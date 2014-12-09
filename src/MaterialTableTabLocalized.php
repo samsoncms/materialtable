@@ -13,7 +13,7 @@ use \samson\cms\web\material\FormTab;
 class MaterialTableTabLocalized extends FormTab
 {
     /** Meta static variable to disable default form rendering */
-    public static $AUTO_RENDER = true;
+    public static $AUTO_RENDER = false;
 
     /** Tab name for showing in header */
     public $name = 'asd';
@@ -27,44 +27,34 @@ class MaterialTableTabLocalized extends FormTab
     /**
      * Constructor
      * @param \samson\cms\web\material\Form $form Pointer to form
-     * @param FormTab $parent Pointer to parent tab
+     * @param \samson\cms\Navigation $structure Pointer to parent tab
      */
-    public function __construct(\samson\cms\web\material\Form & $form, FormTab & $parent = null)
+    public function __construct(\samson\cms\web\material\Form & $form, $structure)
     {
         // Call parent constructor
-        parent::__construct( $form, $parent );
+        parent::__construct($form);
 
-        /** @var array(\samson\cms\Navigation) $structures Array of material structures */
-        $structures = $form->material->cmsnavs();
-        /** @var \samson\cms\Navigation $structure Material structure */
-        if (dbQuery('\samson\cms\CMSNavMaterial')
-            ->cond('MaterialID', $form->material->MaterialID)
-            ->join('structure')
-            ->cond('structure.type', 2)
-            ->first($structure)) {
+        $allTab = new MaterialTableTab($form, $structure->StructureID, $this, '');
 
-            $allTab = new MaterialTableTab($form, $structure->StructureID, $this, '');
+        $this->tabs[] = $allTab;
 
-            $this->tabs[] = $allTab;
+        $tabs = null;
 
-            $tabs = null;
+        // Create all locale sub tab
+        // Iterate available locales if fields exists
+        if (sizeof(SamsonLocale::$locales)) {
+            foreach (SamsonLocale::$locales as $locale) {
+                // Create child tab
+                $tab = new MaterialTableTab($form, $structure->StructureID, $this, $locale);
 
-            // Create all locale sub tab
-            // Iterate available locales if fields exists
-            if (sizeof(SamsonLocale::$locales)) {
-                foreach (SamsonLocale::$locales as $locale) {
-                    // Create child tab
-                    $tab = new MaterialTableTab($form, $structure->StructureID, $this, $locale);
-
-                    // If it is not empty
-                    if ($tab->filled()) {
-                        $tabs[] = $tab;
-                    }
+                // If it is not empty
+                if ($tab->filled()) {
+                    $tabs[] = $tab;
                 }
             }
-            if (!empty($tabs)) {
-                $this->tabs = $tabs;
-            }
+        }
+        if (!empty($tabs)) {
+            $this->tabs = $tabs;
         }
     }
 

@@ -28,7 +28,8 @@ class App extends \samson\cms\App
     {
         // TODO: Change this logic to make tab loading more simple
         // Create new materialtable tabs object to load it
-        class_exists( ns_classname('MaterialTableTabLocalized','samson\cms\web\materialtable') );
+        //class_exists( ns_classname('MaterialTableTabLocalized','samson\cms\web\materialtable') );
+        class_exists( ns_classname('BuildTab','samson\cms\web\materialtable') );
     }
 
     /**

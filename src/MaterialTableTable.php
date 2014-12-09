@@ -181,7 +181,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         $thHTML = '';
 
         foreach ($this->fields as $field) {
-            $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $field->Name)->output();
+            $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $field->Description)->output();
         }
 
         if ($rows != '') {
