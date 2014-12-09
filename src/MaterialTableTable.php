@@ -41,6 +41,9 @@ class MaterialTableTable extends \samson\cms\table\Table
 
         $this->locale = $locale;
 
+        // Flag to determine whether at least one of table columns is localized
+        $localized = false;
+
         // Save pointer to CMSMaterial
         $this->material = & $material;
 
@@ -59,7 +62,17 @@ class MaterialTableTable extends \samson\cms\table\Table
 //        trace($this->locale);
 
         foreach ($structureFields as $field) {
+            if ($field->local == 1) {
+                $localized = true;
+            }
+        }
 
+        if ($localized) {
+
+        }
+        foreach ($structureFields as $field) {
+            // Add fild list
+            $this->fields[$field->id] = $field;
             foreach ($tableMaterialIds as $materialId) {
                 if (!dbQuery('materialfield')
                     ->cond('MaterialID', $materialId)
@@ -69,21 +82,16 @@ class MaterialTableTable extends \samson\cms\table\Table
 
                     if (($locale != '' && $field->local == 1 || $locale == '' && $field->local == 0)) {
 
-                        if (!isset($this->fields[$field->id])) {
-                            $this->fields[$field->id] = $field;
-                        }
                         // Create material field record
                         $mf = new \samson\activerecord\materialfield(false);
                         $mf->MaterialID = $materialId;
                         $mf->FieldID = $field->id;
                         $mf->Active = 1;
-                        if ($locale != '' && $field->local == 1 && !isset($this->fields[$field->id])) {
+                        if ($locale != '' && $field->local == 1) {
                             $mf->locale = $this->locale;
                         }
                         $mf->save();
                     }
-                } else {
-                    $this->fields[$field->id] = $field;
                 }
             }
         }
@@ -92,8 +100,8 @@ class MaterialTableTable extends \samson\cms\table\Table
         $this->query = dbQuery('material')
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
-            ->join('materialfield')
-            ->cond('materialfield_locale', $this->locale);
+            ->join('materialfield');
+//            ->cond('materialfield_locale', $this->locale);
         if (!empty($tableMaterialIds)) {
             $this->query->cond('materialfield_FieldID', array_keys($this->fields));
         }
@@ -108,7 +116,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         $tdHTML = '';
         foreach ($this->fields as $field) {
             foreach ($material->onetomany['_materialfield'] as $mf) {
-                if ($mf->FieldID == $field->FieldID && $mf->locale == $this->locale) {
+                if ($mf->FieldID == $field->FieldID && ($mf->locale == $this->locale || ($field->local == 0 && $mf->locale == ''))) {
                     // Depending on field type
                     switch ($field->Type) {
                         case '4':

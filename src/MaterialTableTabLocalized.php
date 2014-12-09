@@ -47,6 +47,8 @@ class MaterialTableTabLocalized extends FormTab
 
             $this->tabs[] = $allTab;
 
+            $tabs = null;
+
             // Create all locale sub tab
             // Iterate available locales if fields exists
             if (sizeof(SamsonLocale::$locales)) {
@@ -56,9 +58,12 @@ class MaterialTableTabLocalized extends FormTab
 
                     // If it is not empty
                     if ($tab->filled()) {
-                        $this->tabs[] = $tab;
+                        $tabs[] = $tab;
                     }
                 }
+            }
+            if (!empty($tabs)) {
+                $this->tabs = $tabs;
             }
         }
     }
