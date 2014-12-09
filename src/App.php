@@ -46,31 +46,33 @@ class App extends \samson\cms\App
 
     /**
      * Creating new material table row
+     * @param int $materialId This material identifier
+     * @param int $structureId Table structure identifier
      * @return array AJAX response
      */
-    public function __async_add() {
+    public function __async_add($materialId, $structureId) {
         /** @var \samson\cms\CMSMaterial $material */
-        $material = dbQuery('\samson\cms\Material')->cond('MaterialID', $_POST['material_id'])->first();
-
-        $structures = $material->cmsnavs();
-
-        /** @var \samson\cms\Navigation $structure Table structure */
-        foreach ($structures as $structure) {
-            if ($structure->StructureID == $_POST['structure_id']) {
-                $tableMaterial = new \samson\cms\Material(false);
-                $tableMaterial->type = 3;
-                $tableMaterial->Name = 'table_material';
-                $tableMaterial->Url = $structure->Name . md5(date('Y-m-d-h-i-s'));
-                $tableMaterial->parent_id = $material->MaterialID;
-                $tableMaterial->save();
-                $structureMaterial = new \samson\cms\CMSNavMaterial(false);
-                $structureMaterial->StructureID = $structure->StructureID;
-                $structureMaterial->MaterialID = $tableMaterial->MaterialID;
-                $structureMaterial->save();
+        $material = null;
+        if (dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
+            $structures = $material->cmsnavs();
+            if (!empty($structures)) {
+                /** @var \samson\cms\Navigation $structure Table structure */
+                foreach ($structures as $structure) {
+                    if ($structure->StructureID == $structureId) {
+                        $tableMaterial = new \samson\cms\CMSMaterial(false);
+                        $tableMaterial->type = 3;
+                        $tableMaterial->Name = $structure->Name;
+                        $tableMaterial->Url = $structure->Name . '-' . md5(date('Y-m-d-h-i-s'));
+                        $tableMaterial->parent_id = $material->MaterialID;
+                        $tableMaterial->Published = 1;
+                        $tableMaterial->Active = 1;
+                        $tableMaterial->save();
+                    }
+                }
+                return array('status' => 1);
             }
         }
-
-        return array('status' => 1);
+        return array('status' => 0);
     }
 
     /**
@@ -83,11 +85,16 @@ class App extends \samson\cms\App
         // Async response
         $result = array( 'status' => false );
 
-        /** @var \samson\cms\Material $material */
+        /** @var \samson\cms\CMSMaterial $material */
         $material = null;
 
-        if( dbQuery('material')->id($id)->first($material)) {
-            $material->delete();
+//        if (ifcmsmat($id, $material, 'MaterialID')) {
+//            $material->delete();
+//            $result['status'] = true;
+//        }
+        if( dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+            $material->deleteWithFields();
+//            var_dump($material);
             $result['status'] = true;
         }
 
@@ -141,7 +148,8 @@ class App extends \samson\cms\App
         if (($locale == '' && $all) || ($locale != '' && $multilingual)) {
             return m('material_table')->view('tab_view')
                 ->set('table', $table->render())
-                ->set('currentID', $materialId)
+                ->set('materialId', $materialId)
+                ->set('structureId', $structureId)
                 ->output();
         }
         return '';

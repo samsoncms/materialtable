@@ -1,6 +1,6 @@
-<a class="related_material_add" href="<?php url_base('related_material/addpopup', 'currentID') ?>">
-    <?php t('Добавить подчиненный') ?>
+<a class="material_table_add" href="<?php url_base('material_table/add', 'materialId', 'structureId', 'material_table/table', 'materialId') ?>">
+    <?php t('Добавить строку таблицы') ?>
 </a>
-<div class="related_material_tab">
+<div class="material_table_tab">
     <?php iv('table') ?>
 </div>

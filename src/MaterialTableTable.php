@@ -46,17 +46,19 @@ class MaterialTableTable extends \samson\cms\table\Table
 
         // Get all table materials identifiers from parent
         $tableMaterialIds = dbQuery('material')
-            ->cond('material.parent_id', $this->material->id)
-            ->cond('material.type', 3)
-            ->cond('material.Active', 1)
-            ->cond('material.Draft', 0)
+            ->cond('parent_id', $this->material->id)
+            ->cond('type', 3)
+            ->cond('Active', 1)
+            ->cond('Draft', 0)
             ->fieldsNew('MaterialID');
 
         dbQuery('field')->join('structurefield')->cond('StructureID', $structureId)->exec($structureFields);
 
-        foreach ($structureFields as $field) {
+//        trace($structureFields, true);
+//        trace($tableMaterialIds, true);
+//        trace($this->locale);
 
-            $this->fields[$field->id] = $field;
+        foreach ($structureFields as $field) {
 
             foreach ($tableMaterialIds as $materialId) {
                 if (!dbQuery('materialfield')
@@ -65,26 +67,36 @@ class MaterialTableTable extends \samson\cms\table\Table
                     ->cond('FieldID', $field->id)
                     ->first()) {
 
-                    // Create material field record
-                    $mf = new \samson\activerecord\materialfield(false);
-                    $mf->MaterialID = $materialId;
-                    $mf->FieldID = $field->id;
-                    $mf->Active = 1;
-                    if ($locale != '' && $field->local == 1 && !isset($this->fields[$field->id])) {
-                        $mf->locale = $this->locale;
+                    if (($locale != '' && $field->local == 1 || $locale == '' && $field->local == 0)) {
+
+                        if (!isset($this->fields[$field->id])) {
+                            $this->fields[$field->id] = $field;
+                        }
+                        // Create material field record
+                        $mf = new \samson\activerecord\materialfield(false);
+                        $mf->MaterialID = $materialId;
+                        $mf->FieldID = $field->id;
+                        $mf->Active = 1;
+                        if ($locale != '' && $field->local == 1 && !isset($this->fields[$field->id])) {
+                            $mf->locale = $this->locale;
+                        }
+                        $mf->save();
                     }
-                    $mf->save();
+                } else {
+                    $this->fields[$field->id] = $field;
                 }
             }
         }
 
         // Get all child materials material fields for this locale
         $this->query = dbQuery('material')
-            ->cond('material.parent_id', $this->material->id)
-            ->cond('material.type', 3)
+            ->cond('parent_id', $this->material->id)
+            ->cond('type', 3)
             ->join('materialfield')
-            ->cond('materialfield.FieldID', array_keys($this->fields))
-            ->cond('materialfield.locale', $this->locale);
+            ->cond('materialfield_locale', $this->locale);
+        if (!empty($tableMaterialIds)) {
+            $this->query->cond('materialfield_FieldID', array_keys($this->fields));
+        }
 
         // Constructor treed
         parent::__construct( $this->query );
@@ -115,7 +127,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                             $input = \samson\cms\input\Field::fromObject($mf, 'Value', 'Field');
                     }
 
-                    $tdHTML .= $this->renderModule->view('table/tdView')->set('input', $input)->output();
+                    $tdHTML .= $this->renderModule->view('table/tdView')->set($input, 'input')->output();
                     break;
                 }
             }
@@ -124,7 +136,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         // Render field row
         return $this->renderModule
             ->view($this->row_tmpl)
-            ->set('materialName', \samson\cms\input\Field::fromObject($material, 'Url', 'Field'))
+            ->set(\samson\cms\input\Field::fromObject($material, 'Url', 'Field'), 'materialName')
             ->set('materialID', $material->id)
             ->set('parentID', $material->parent_id)
             ->set('td_view', $tdHTML)
