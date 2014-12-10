@@ -96,7 +96,7 @@ class App extends \samson\cms\App
         $material = null;
 
         if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
-            $material->deleteWithFields();
+            $material->deleteWithRelations();
             $result['status'] = true;
         }
 
@@ -115,7 +115,7 @@ class App extends \samson\cms\App
 
         /** @var \samson\cms\Navigation $structure */
         $structure = cmsnav($structureId, 'StructureId');
-//        var_dump($structure);
+
         /** @var MaterialTableTabLocalized $tab */
         $tab = new MaterialTableTabLocalized($form, $structure);
 
