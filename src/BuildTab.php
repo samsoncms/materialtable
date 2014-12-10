@@ -26,7 +26,6 @@ class BuildTab extends FormTab
             foreach ($structures as $structure) {
                 if ($structure->type == 2) {
                     $tableTab = new MaterialTableTabLocalized($form, $structure);
-                    $tableTab->name = $structure->Name;
                     $form->tabs[] = $tableTab;
                 }
             }

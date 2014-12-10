@@ -1,13 +1,12 @@
 <?php
 namespace samson\cms\web\materialtable;
 
+use samson\pager\Pager;
+
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
  * on 02.12.2014 at 12:41
  */
-use samson\activerecord\field;
-use samson\activerecord\structure;
-use samson\pager\Pager;
 
 class MaterialTableTable extends \samson\cms\table\Table
 {
@@ -23,6 +22,9 @@ class MaterialTableTable extends \samson\cms\table\Table
     /** Pointer to CMSMaterial */
     private $material;
 
+    /** @var \samson\cms\Navigation Pointer to current table structure */
+    private $structure;
+
     /** Fields locale */
     private $locale;
 
@@ -34,15 +36,12 @@ class MaterialTableTable extends \samson\cms\table\Table
 //     */
 //    private $structures = array();
 
-    public function __construct(\samson\cms\CMSMaterial & $material, $structureId, $locale = 'ru')
+    public function __construct(\samson\cms\CMSMaterial & $material, $structure, $locale = 'ru')
     {
         // Retrieve pointer to current module for rendering
         $this->renderModule = & s()->module($this->renderModule);
 
         $this->locale = $locale;
-
-        // Flag to determine whether at least one of table columns is localized
-        $localized = false;
 
         // Save pointer to CMSMaterial
         $this->material = & $material;
@@ -53,23 +52,13 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('type', 3)
             ->cond('Active', 1)
             ->cond('Draft', 0)
+            ->join('structurematerial')
+            ->cond('structurematerial.StructureID', $structure->StructureID)
             ->fieldsNew('MaterialID');
 
-        dbQuery('field')->join('structurefield')->cond('StructureID', $structureId)->exec($structureFields);
+        $this->structure = $structure;
+        dbQuery('field')->join('structurefield')->cond('StructureID', $structure->StructureID)->exec($structureFields);
 
-//        trace($structureFields, true);
-//        trace($tableMaterialIds, true);
-//        trace($this->locale);
-
-        foreach ($structureFields as $field) {
-            if ($field->local == 1) {
-                $localized = true;
-            }
-        }
-
-        if ($localized) {
-
-        }
         foreach ($structureFields as $field) {
             // Add fild list
             $this->fields[$field->id] = $field;
@@ -101,9 +90,8 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
             ->join('materialfield');
-//            ->cond('materialfield_locale', $this->locale);
-        if (!empty($tableMaterialIds)) {
-            $this->query->cond('materialfield_FieldID', array_keys($this->fields));
+        if (!empty($this->fields)) {
+            $this->query->cond('materialfield.FieldID', array_keys($this->fields));
         }
 
         // Constructor treed
@@ -147,6 +135,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->set(\samson\cms\input\Field::fromObject($material, 'Url', 'Field'), 'materialName')
             ->set('materialID', $material->id)
             ->set('parentID', $material->parent_id)
+            ->set('structureId', $this->structure->StructureID)
             ->set('td_view', $tdHTML)
             ->set($pager, 'pager')
             ->output();
@@ -162,6 +151,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             $this->query->exec($db_rows);
         }
 
+//        var_dump($db_rows);
         // If we have table rows data
         if( is_array($db_rows ) ) {
 
@@ -175,8 +165,6 @@ class MaterialTableTable extends \samson\cms\table\Table
         }
         // No data found after query, external render specified
         else $rows .= $this->emptyrow($this->query, $this->pager );
-
-        //elapsed('render pages: '.$this->pager->total);
 
         $thHTML = '';
 

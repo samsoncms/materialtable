@@ -31,11 +31,11 @@ class MaterialTableTab extends FormTab
     /**
      * Constructor
      * @param \samson\cms\web\material\Form $form Pointer to form
-     * @param int $structureId
+     * @param \samson\cms\Navigation $structure
      * @param FormTab $parent
      * @param string $locale
      */
-    public function __construct( \samson\cms\web\material\Form & $form, $structureId, FormTab & $parent = null, $locale = null )
+    public function __construct( \samson\cms\web\material\Form & $form, $structure, FormTab & $parent = null, $locale = null )
     {
 //        var_dump(1);
         // Call parent constructor
@@ -53,7 +53,7 @@ class MaterialTableTab extends FormTab
         /** @var \samson\cms\web\materialtable\App $module */
         $module = m('material_table');
 
-        $this->content_html = $module->getMaterialTableTable($material->id, $structureId, $locale);
+        $this->content_html = $module->getMaterialTableTable($material->id, $structure, $locale);
     }
 
     /**

@@ -21,15 +21,15 @@ class App extends \samson\cms\App
     /** Identifier */
     protected $id = 'material_table';
 
-    protected $form;
+//    protected $form;
 
     /** @see \samson\core\ExternalModule::init() */
-    public function prepare( array $params = null )
+    public function prepare(array $params = null)
     {
         // TODO: Change this logic to make tab loading more simple
         // Create new materialtable tabs object to load it
         //class_exists( ns_classname('MaterialTableTabLocalized','samson\cms\web\materialtable') );
-        class_exists( ns_classname('BuildTab','samson\cms\web\materialtable') );
+        class_exists(ns_classname('BuildTab','samson\cms\web\materialtable'));
     }
 
     /**
@@ -60,6 +60,7 @@ class App extends \samson\cms\App
                 /** @var \samson\cms\Navigation $structure Table structure */
                 foreach ($structures as $structure) {
                     if ($structure->StructureID == $structureId) {
+//                        var_dump($structureId);
                         $tableMaterial = new \samson\cms\CMSMaterial(false);
                         $tableMaterial->type = 3;
                         $tableMaterial->Name = $structure->Name;
@@ -68,6 +69,11 @@ class App extends \samson\cms\App
                         $tableMaterial->Published = 1;
                         $tableMaterial->Active = 1;
                         $tableMaterial->save();
+                        $structureMaterial = new \samson\cms\CMSNavMaterial(false);
+                        $structureMaterial->StructureID = $structureId;
+                        $structureMaterial->MaterialID  = $tableMaterial->MaterialID;
+                        $structureMaterial->Active = 1;
+                        $structureMaterial->save();
                     }
                 }
                 return array('status' => 1);
@@ -89,13 +95,8 @@ class App extends \samson\cms\App
         /** @var \samson\cms\CMSMaterial $material */
         $material = null;
 
-//        if (ifcmsmat($id, $material, 'MaterialID')) {
-//            $material->delete();
-//            $result['status'] = true;
-//        }
-        if( dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+        if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
             $material->deleteWithFields();
-//            var_dump($material);
             $result['status'] = true;
         }
 
@@ -105,26 +106,30 @@ class App extends \samson\cms\App
     /**
      * Async updating material table
      * @param $parentID
+     * @param $structureId
      * @return array
      */
-    public function __async_table($parentID)
+    public function __async_table($parentID, $structureId)
     {
         $form = new \samson\cms\web\material\Form($parentID);
 
+        /** @var \samson\cms\Navigation $structure */
+        $structure = cmsnav($structureId, 'StructureId');
+//        var_dump($structure);
         /** @var MaterialTableTabLocalized $tab */
-        $tab = new MaterialTableTabLocalized($form);
+        $tab = new MaterialTableTabLocalized($form, $structure);
 
         $content = $tab->getContent();
 
         return array('status' => 1, 'table' => $content);
     }
 
-    public function getMaterialTableTable($materialId, $structureId, $locale = '')
+    public function getMaterialTableTable($materialId, $structure, $locale = '')
     {
         /** @var \samson\cms\CMSMaterial $material */
         $material = dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first();
 
-        $table = new MaterialTableTable($material, $structureId, $locale);
+        $table = new MaterialTableTable($material, $structure, $locale);
 
         $all = false;
         $multilingual = false;
@@ -132,15 +137,15 @@ class App extends \samson\cms\App
         if (dbQuery('\samson\cms\CMSNavMaterial')
             ->cond('MaterialID', $materialId)
             ->join('structure')
-            ->cond('StructureID', $structureId)
+            ->cond('StructureID', $structure->StructureID)
             ->first()) {
 
             // Check with locales we have in fields table
-            if (dbQuery('structurefield')->cond('StructureID', $structureId)
+            if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
                 ->join('field')->cond('field_local', 0)->first()) {
                 $all = true;
             }
-            if (dbQuery('structurefield')->cond('StructureID', $structureId)
+            if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
                 ->join('field')->cond('field_local', 1)->first()) {
                 $multilingual = true;
             }
@@ -150,7 +155,7 @@ class App extends \samson\cms\App
             return m('material_table')->view('tab_view')
                 ->set('table', $table->render())
                 ->set('materialId', $materialId)
-                ->set('structureId', $structureId)
+                ->set('structureId', $structure->StructureID)
                 ->output();
         }
         return '';

@@ -1,4 +1,4 @@
-<a class="material_table_add" href="<?php url_base('material_table/add', 'materialId', 'structureId', 'material_table/table', 'materialId') ?>">
+<a class="material_table_add" href="<?php url_base('material_table/add', 'materialId', 'structureId', 'material_table/table', 'materialId', 'structureId') ?>">
     <?php t('Добавить строку таблицы') ?>
 </a>
 <div class="material_table_tab">

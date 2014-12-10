@@ -34,7 +34,10 @@ class MaterialTableTabLocalized extends FormTab
         // Call parent constructor
         parent::__construct($form);
 
-        $allTab = new MaterialTableTab($form, $structure->StructureID, $this, '');
+        $this->name = $structure->Name;
+        $this->id .= '-' . $structure->StructureID;
+
+        $allTab = new MaterialTableTab($form, $structure, $this, '');
 
         $this->tabs[] = $allTab;
 
@@ -45,7 +48,7 @@ class MaterialTableTabLocalized extends FormTab
         if (sizeof(SamsonLocale::$locales)) {
             foreach (SamsonLocale::$locales as $locale) {
                 // Create child tab
-                $tab = new MaterialTableTab($form, $structure->StructureID, $this, $locale);
+                $tab = new MaterialTableTab($form, $structure, $this, $locale);
 
                 // If it is not empty
                 if ($tab->filled()) {

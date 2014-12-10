@@ -4,6 +4,6 @@
     </td>
     <?php iv('td_view') ?>
     <td>
-        <a href="<?php url_base('material_table/delete', 'materialID', 'related_material/table', 'parentID') ?>" class="delete_table_material"> </a>
+        <a href="<?php url_base('material_table/delete', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="delete_table_material"> </a>
     </td>
 </tr>
