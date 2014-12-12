@@ -10,10 +10,10 @@ use samson\pager\Pager;
 
 class MaterialTableTable extends \samson\cms\table\Table
 {
-    /** Change table template */
+    /** Table template */
     public $table_tmpl = 'table/index';
 
-    /** Default table row template */
+    /** Table row template */
     public $row_tmpl = 'table/row';
 
     /** Existing CMSMaterial field records */
@@ -28,25 +28,28 @@ class MaterialTableTable extends \samson\cms\table\Table
     /** Fields locale */
     private $locale;
 
-    /** @var string  */
+    /** @var string $renderModule Module to render */
     protected $renderModule = 'material_table';
 
-//    /**
-//     * @var array $structures Collection of structures with related fields
-//     */
-//    private $structures = array();
-
-    public function __construct(\samson\cms\CMSMaterial & $material, $structure, $locale = 'ru')
+    /**
+     * Constructor
+     * @param \samson\cms\CMSMaterial $material Current material object
+     * @param Pager $pager Pager object
+     * @param \samson\cms\Navigation Current table structure object
+     * @param string $locale Locale string
+     */
+    public function __construct(\samson\cms\CMSMaterial & $material, Pager $pager = null, $structure, $locale = 'ru')
     {
         // Retrieve pointer to current module for rendering
         $this->renderModule = & s()->module($this->renderModule);
 
+        // Set input locale as current
         $this->locale = $locale;
 
         // Save pointer to CMSMaterial
         $this->material = & $material;
 
-        // Get all table materials identifiers from parent
+        // Get all table materials identifiers from current form material
         $tableMaterialIds = dbQuery('material')
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
@@ -56,40 +59,54 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('structurematerial.StructureID', $structure->StructureID)
             ->fieldsNew('MaterialID');
 
+        // Set current table structure as input structure
         $this->structure = $structure;
+
+        // Get all fields of table structure
         dbQuery('field')->join('structurefield')->cond('StructureID', $structure->StructureID)->exec($structureFields);
 
+        /** @var \samson\cms\CMSField $field Field object */
         foreach ($structureFields as $field) {
-            // Add fild list
+
+            // Add field to fields collection
             $this->fields[$field->id] = $field;
+
+            /** @var int $materialId Table material identifier */
             foreach ($tableMaterialIds as $materialId) {
+
+                // If such materialfield (Table cell) doesn't exist
                 if (!dbQuery('materialfield')
                     ->cond('MaterialID', $materialId)
                     ->cond('locale', $this->locale)
                     ->cond('FieldID', $field->id)
                     ->first()) {
 
+                    // If locale is set and field is localized
+                    // Or if locale is not set and isn't localized
                     if (($locale != '' && $field->local == 1 || $locale == '' && $field->local == 0)) {
 
-                        // Create material field record
-                        $mf = new \samson\activerecord\materialfield(false);
-                        $mf->MaterialID = $materialId;
-                        $mf->FieldID = $field->id;
-                        $mf->Active = 1;
+                        /** @var \samson\activerecord\materialfield $materialField Create material field record */
+                        $materialField = new \samson\activerecord\materialfield(false);
+                        $materialField->MaterialID = $materialId;
+                        $materialField->FieldID = $field->id;
+                        $materialField->Active = 1;
+                        // Set materialfield locale if locale is set and field is localized
                         if ($locale != '' && $field->local == 1) {
-                            $mf->locale = $this->locale;
+                            $materialField->locale = $this->locale;
                         }
-                        $mf->save();
+                        // Write it to DataBase
+                        $materialField->save();
                     }
                 }
             }
         }
 
-        // Get all child materials material fields for this locale
+        // Get all table materials
         $this->query = dbQuery('material')
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
             ->join('materialfield');
+        // With specified fields if they exist
         if (!empty($this->fields)) {
             $this->query->cond('materialfield.FieldID', array_keys($this->fields));
         }
@@ -98,31 +115,50 @@ class MaterialTableTable extends \samson\cms\table\Table
         parent::__construct( $this->query );
     }
 
-
+    /**
+     * Function to view table row
+     * @param \samson\activerecord\material $material Tale material represented as row
+     * @param Pager $pager Pager for multi page table
+     * @return string
+     */
     public function row(& $material, Pager & $pager = null )
     {
+        /** @var string $tdHTML Table cell HTML code */
         $tdHTML = '';
+
+        /** @var \samson\cms\CMSField $field Field of current table structure (Table column) */
         foreach ($this->fields as $field) {
-            foreach ($material->onetomany['_materialfield'] as $mf) {
-                if ($mf->FieldID == $field->FieldID && ($mf->locale == $this->locale || ($field->local == 0 && $mf->locale == ''))) {
+            /** @var \samson\activerecord\materialfield $materialField Materialfield object (Table cell) */
+            foreach ($material->onetomany['_materialfield'] as $materialField) {
+                // If materialfield relates to field (column) and has same locale or doesn't have it
+                if ($materialField->FieldID == $field->FieldID &&
+                    ($materialField->locale == $this->locale || ($field->local == 0 && $materialField->locale == ''))) {
+
                     // Depending on field type
                     switch ($field->Type) {
                         case '4':
-                            $input = \samson\cms\input\Field::fromObject($mf, 'Value', 'Select')->optionsFromString($mf->Value);
+                            /** @var \samson\cms\input\Select $input Select field type */
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Select');
+                            $input->optionsFromString($materialField->Value);
                             break;
                         case '1':
-                            $input = \samson\cms\input\Field::fromObject($mf, 'Value', 'File');
+                            /** @var \samson\cms\input\File $input File field type */
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'File');
                             break;
                         case '3':
-                            $input = \samson\cms\input\Field::fromObject($mf, 'Value', 'Date');
+                            /** @var \samson\cms\input\Date $input Date field type */
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Date');
                             break;
                         case '7':
-                            $input = \samson\cms\input\Field::fromObject($mf, 'numeric_value', 'Field');
+                            /** @var \samson\cms\input\Field $input Numeric filed type */
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'numeric_value', 'Field');
                             break;
                         default :
-                            $input = \samson\cms\input\Field::fromObject($mf, 'Value', 'Field');
+                            /** @var \samson\cms\input\Field $input Text filed type */
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Field');
                     }
 
+                    // Set HTML row code
                     $tdHTML .= $this->renderModule->view('table/tdView')->set($input, 'input')->output();
                     break;
                 }
@@ -141,37 +177,45 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->output();
     }
 
-    public function render( array $db_rows = null, $module = null)
+    /**
+     * Function to render table
+     * @param array $dbRows Set of table materials
+     * @param null $module
+     * @return string Table HTML
+     */
+    public function render(array $dbRows = null, $module = null)
     {
         // Rows HTML
         $rows = '';
 
         // if no rows data is passed - perform db request
-        if(!isset($db_rows)) {
-            $this->query->exec($db_rows);
+        if(!isset($dbRows)) {
+            $this->query->exec($dbRows);
         }
 
-//        var_dump($db_rows);
         // If we have table rows data
-        if( is_array($db_rows ) ) {
+        if (is_array($dbRows)) {
 
             // Save quantity of rendering rows
-            $this->last_render_count = sizeof($db_rows);
+            $this->last_render_count = sizeof($dbRows);
 
             // Iterate db data and perform rendering
-            foreach( $db_rows as & $db_row ) {
-                $rows .= $this->row( $db_row, $this->pager );
+            foreach($dbRows as & $dbRow) {
+                $rows .= $this->row( $dbRow, $this->pager );
             }
         }
         // No data found after query, external render specified
         else $rows .= $this->emptyrow($this->query, $this->pager );
 
+        // Columns headers HTML
         $thHTML = '';
 
+        /** @var \samson\cms\CMSField $field Table structure fields */
         foreach ($this->fields as $field) {
             $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $field->Description)->output();
         }
 
+        // If there is some data in table
         if ($rows != '') {
             // Render table view
             return $this->renderModule
@@ -183,7 +227,5 @@ class MaterialTableTable extends \samson\cms\table\Table
         } else {
             return '';
         }
-
     }
-
 }

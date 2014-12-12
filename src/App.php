@@ -1,10 +1,6 @@
 <?php
 namespace samson\cms\web\materialtable;
 
-use samson\activerecord\material;
-use samson\activerecord\structure;
-use samson\cms\input\Date;
-
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
  * on 02.12.2014 at 12:03
@@ -21,8 +17,6 @@ class App extends \samson\cms\App
     /** Identifier */
     protected $id = 'material_table';
 
-//    protected $form;
-
     /** @see \samson\core\ExternalModule::init() */
     public function prepare(array $params = null)
     {
@@ -33,34 +27,32 @@ class App extends \samson\cms\App
     }
 
     /**
-     * @param $materialId int Material identifier
-     * @param $structureId int Structure identifier
-     * @return array AJAX response
-     */
-    public function __async_addpopup($materialId, $structureId) {
-        return array('status' => 1, 'popup' => m('material_table')
-            ->view('popup/add_popup')
-            ->set('materialId', $materialId)
-            ->set('structureId', $structureId)
-            ->output());
-    }
-
-    /**
      * Creating new material table row
-     * @param int $materialId This material identifier
-     * @param int $structureId Table structure identifier
+     * @param int $materialId Current material identifier
+     * @param int $structureId Current table structure identifier
      * @return array AJAX response
      */
-    public function __async_add($materialId, $structureId) {
-        /** @var \samson\cms\CMSMaterial $material */
+    public function __async_add($materialId, $structureId)
+    {
+        /** @var \samson\cms\CMSMaterial $material Current material object */
         $material = null;
+
+        // If there are no such row yet
         if (dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
+
+            /** @var array $structures Array of structures of this material */
             $structures = $material->cmsnavs();
+
+            // If there are some structures
             if (!empty($structures)) {
+
                 /** @var \samson\cms\Navigation $structure Table structure */
                 foreach ($structures as $structure) {
+
+                    // If current material has incoming structure
                     if ($structure->StructureID == $structureId) {
-//                        var_dump($structureId);
+
+                        /** @var \samson\cms\CMSMaterial $tableMaterial New table material (table row) */
                         $tableMaterial = new \samson\cms\CMSMaterial(false);
                         $tableMaterial->type = 3;
                         $tableMaterial->Name = $structure->Name;
@@ -69,6 +61,9 @@ class App extends \samson\cms\App
                         $tableMaterial->Published = 1;
                         $tableMaterial->Active = 1;
                         $tableMaterial->save();
+
+                        /** @var \samson\cms\CMSNavMaterial $structureMaterial Relation between created table material
+                         * and table structure */
                         $structureMaterial = new \samson\cms\CMSNavMaterial(false);
                         $structureMaterial->StructureID = $structureId;
                         $structureMaterial->MaterialID  = $tableMaterial->MaterialID;
@@ -76,9 +71,11 @@ class App extends \samson\cms\App
                         $structureMaterial->save();
                     }
                 }
+                // Set success status and return result
                 return array('status' => 1);
             }
         }
+        // Set fail status and return result
         return array('status' => 0);
     }
 
@@ -89,75 +86,116 @@ class App extends \samson\cms\App
      */
     public function __async_delete($id)
     {
-        // Async response
+        /** @var array $result Async response */
         $result = array( 'status' => false );
 
         /** @var \samson\cms\CMSMaterial $material */
         $material = null;
 
+        // If such material exists
         if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+            // Delete this table material with it's all relations to structures and fields
             $material->deleteWithRelations();
+            // Set success status
             $result['status'] = true;
         }
-
+        // Return result
         return $result;
     }
 
     /**
      * Async updating material table
-     * @param $parentID
-     * @param $structureId
-     * @return array
+     * @param int $materialId Current material identifier
+     * @param int $structureId Current table structure identifier
+     * @return array Asynchronous response
      */
-    public function __async_table($parentID, $structureId)
+    public function __async_table($materialId, $structureId)
     {
-        $form = new \samson\cms\web\material\Form($parentID);
+        /** @var array $result Asynchronous response */
+        $result = array('status' => false);
 
-        /** @var \samson\cms\Navigation $structure */
+        /** @var \samson\cms\web\material\Form $form Create new form to update information */
+        $form = new \samson\cms\web\material\Form($materialId);
+
+        /** @var \samson\cms\Navigation $structure Current table structure */
         $structure = cmsnav($structureId, 'StructureId');
 
-        /** @var MaterialTableTabLocalized $tab */
-        $tab = new MaterialTableTabLocalized($form, $structure);
+        // If such structure exists
+        if (isset($structureId)) {
+            /** @var MaterialTableTabLocalized $tab New tab with updated table */
+            $tab = new MaterialTableTabLocalized($form, $structure);
 
-        $content = $tab->getContent();
+            // Get HTML code of this tab
+            $content = $tab->getContent();
 
-        return array('status' => 1, 'table' => $content);
+            // Set success status and generated HTML
+            $result['status'] = true;
+            $result['table'] = $content;
+        }
+
+        // Return result of this controller
+        return $result;
     }
 
+    /**
+     * Function to generate new table
+     * @param int $materialId Current material identifier
+     * @param \samson\cms\Navigation $structure Current table structure
+     * @param string $locale Current locale
+     * @return string Generated table HTML
+     */
     public function getMaterialTableTable($materialId, $structure, $locale = '')
     {
-        /** @var \samson\cms\CMSMaterial $material */
-        $material = dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first();
+        /** @var \samson\cms\CMSMaterial $material Current material object */
+        $material = null;
 
-        $table = new MaterialTableTable($material, $structure, $locale);
+        // If material was found by identifier
+        if (dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
 
-        $all = false;
-        $multilingual = false;
+            /** @var MaterialTableTable $table Current table object */
+            $table = new MaterialTableTable($material, null, $structure, $locale);
 
-        if (dbQuery('\samson\cms\CMSNavMaterial')
-            ->cond('MaterialID', $materialId)
-            ->join('structure')
-            ->cond('StructureID', $structure->StructureID)
-            ->first()) {
+            /** @var boolean $all Flag to determine non-localized tab */
+            $all = false;
+            /** @var boolean $multilingual Flag to determine localized tab */
+            $multilingual = false;
 
-            // Check with locales we have in fields table
-            if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
-                ->join('field')->cond('field_local', 0)->first()) {
-                $all = true;
+            // If there is relation between current material and current table structure
+            if (dbQuery('\samson\cms\CMSNavMaterial')
+                ->cond('MaterialID', $materialId)
+                ->join('structure')
+                ->cond('StructureID', $structure->StructureID)
+                ->first()
+            ) {
+
+                // If table structure has at least one none localized field
+                if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
+                    ->join('field')->cond('field_local', 0)->first()
+                ) {
+                    // Set non-localized flag to true
+                    $all = true;
+                }
+                // If table structure has at least one localized field
+                if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
+                    ->join('field')->cond('field_local', 1)->first()
+                ) {
+                    // Set localized flag to true
+                    $multilingual = true;
+                }
             }
-            if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
-                ->join('field')->cond('field_local', 1)->first()) {
-                $multilingual = true;
+
+            // If locale is not set and none localized flag is true
+            // Or if locale is set and localized flag is true
+            // Render table to get it's HTML code
+            if (($locale == '' && $all) || ($locale != '' && $multilingual)) {
+                return m('material_table')->view('tab_view')
+                    ->set('table', $table->render())
+                    ->set('materialId', $materialId)
+                    ->set('structureId', $structure->StructureID)
+                    ->output();
             }
         }
-
-        if (($locale == '' && $all) || ($locale != '' && $multilingual)) {
-            return m('material_table')->view('tab_view')
-                ->set('table', $table->render())
-                ->set('materialId', $materialId)
-                ->set('structureId', $structure->StructureID)
-                ->output();
-        }
+        // Return empty string on fail
         return '';
     }
 }

@@ -12,32 +12,15 @@ class MaterialTableTab extends FormTab
     /** Meta static variable to disable default form rendering */
     public static $AUTO_RENDER = false;
 
-    /** Tab sorting index */
-    public $index = 2;
-
-//    /** Content view path */
-    //private $content_view = 'tumbs/index';
-
-//    /** @see \samson\cms\web\material\FormTab::content() */
-    /*public function content()
-    {
-        // Render content into inner content html
-        if( isset($this->form->material) ) $this->content_html = m('related_material')->getRelatedTable( $this->form->material->id );
-
-        // Render parent tab view
-        return parent::content();
-    }*/
-
     /**
      * Constructor
      * @param \samson\cms\web\material\Form $form Pointer to form
-     * @param \samson\cms\Navigation $structure
-     * @param FormTab $parent
-     * @param string $locale
+     * @param \samson\cms\Navigation $structure Current tab table structure
+     * @param FormTab $parent Pointer to parent tab object
+     * @param string $locale Current locale
      */
     public function __construct( \samson\cms\web\material\Form & $form, $structure, FormTab & $parent = null, $locale = null )
     {
-//        var_dump(1);
         // Call parent constructor
         parent::__construct( $form, $parent );
 
@@ -50,9 +33,10 @@ class MaterialTableTab extends FormTab
         // Set pointer to CMSMaterial
         $material = & $form->material;
 
-        /** @var \samson\cms\web\materialtable\App $module */
+        /** @var \samson\cms\web\materialtable\App $module Get materialtable module */
         $module = m('material_table');
 
+        // Set this tab content HTML as table HTML
         $this->content_html = $module->getMaterialTableTable($material->id, $structure, $locale);
     }
 
