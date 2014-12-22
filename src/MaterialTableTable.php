@@ -105,6 +105,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         $this->query = dbQuery('material')
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
+            ->order_by('priority')
             ->join('materialfield');
         // With specified fields if they exist
         if (!empty($this->fields)) {

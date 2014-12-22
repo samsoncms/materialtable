@@ -104,6 +104,32 @@ class App extends \samson\cms\App
     }
 
     /**
+     * Controller for copying row from material table
+     * @param string $id Table material identifier
+     * @return array Async response array
+     */
+    public function __async_copy($id)
+    {
+        /** @var array $result Async response */
+        $result = array( 'status' => false );
+
+        /** @var \samson\cms\CMSMaterial $material */
+        $material = null;
+
+        // If such material exists
+        if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+            // Make copy of this material
+            /** @var \samson\cms\CMSMaterial $copy Copy of existing material */
+            $copy = $material->copy();
+            $copy->save();
+            // Set success status
+            $result['status'] = true;
+        }
+        // Return result
+        return $result;
+    }
+
+    /**
      * Async updating material table
      * @param int $materialId Current material identifier
      * @param int $structureId Current table structure identifier
@@ -134,6 +160,34 @@ class App extends \samson\cms\App
         }
 
         // Return result of this controller
+        return $result;
+    }
+
+    public function __async_priority()
+    {
+        /** @var array $result Asynchronous controller result */
+        $result = array('status' => true);
+
+        // If we have changed priority of rows
+        if (isset($_POST['ids'])) {
+            // For each received row id
+            for ($i = 0; $i < count($_POST['ids']); $i++) {
+                /** @var \samson\activerecord\material $material Variable to store material */
+                $material = null;
+                // If we have such material in database
+                if (dbQuery('material')->cond('MaterialID', $_POST['ids'][$i])->first($material)) {
+                    // Reset it's priority and save it
+                    $material->priority = $i;
+                    $material->save();
+                } else {
+                    $result['status'] = false;
+                    $result['message'] = 'Can not find materials with specified ids!';
+                }
+            }
+        } else {
+            $result['status'] = false;
+            $result['message'] = 'There are no materials to sort!';
+        }
         return $result;
     }
 

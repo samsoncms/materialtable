@@ -60,7 +60,7 @@
 }
 
 .delete_table_material {
-  display: block;
+  display: inline-block;
   width: 16px;
   height: 16px;
   background: url("../img/material_delete.png");
@@ -71,5 +71,20 @@
 
   &:active {
     background: url("../img/material_delete_active.png");
+  }
+}
+
+.copy_table_material {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: url("../img/material_copy.png");
+
+  &:hover {
+    background: url("../img/material_copy_hover.png");
+  }
+
+  &:active {
+    background: url("../img/material_copy_active.png");
   }
 }
