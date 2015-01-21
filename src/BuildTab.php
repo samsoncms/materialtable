@@ -31,7 +31,7 @@ class BuildTab extends FormTab
             /** @var \samson\cms\Navigation $structure Material structure */
             foreach ($structures as $structure) {
                 // If it is table structure
-                if ($structure->type == 2) {
+                if (!empty($structure) && $structure->type == 2) {
                     // Create new tab for each table structure
                     $tableTab = new MaterialTableTabLocalized($form, $structure);
                     // Add created tab to tabs collection
