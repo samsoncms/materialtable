@@ -150,6 +150,10 @@ class MaterialTableTable extends \samson\cms\table\Table
                             /** @var \samson\cms\input\Date $input Date field type */
                             $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Date');
                             break;
+                        case '6':
+                            /** @var \samson\cms\input\Material $input Material field type */
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Material');
+                            break;
                         case '7':
                             /** @var \samson\cms\input\Field $input Numeric filed type */
                             $input = \samson\cms\input\Field::fromObject($materialField, 'numeric_value', 'Field');
