@@ -122,7 +122,7 @@ class MaterialTableTable extends \samson\cms\table\Table
      * @param Pager $pager Pager for multi page table
      * @return string
      */
-    public function row(& $material, Pager & $pager = null )
+    public function row(& $material, Pager & $pager = null, $module = NULL)
     {
         /** @var string $tdHTML Table cell HTML code */
         $tdHTML = '';
