@@ -52,6 +52,11 @@ class App extends \samson\cms\App
                     // If current material has incoming structure
                     if ($structure->StructureID == $structureId) {
 
+                        /** @var \samson\social\Core $socialModule Social module object */
+                        $socialModule = m('social');
+                        /** @var \samson\activerecord\user $user User object */
+                        $user = $socialModule->user();
+
                         /** @var \samson\cms\CMSMaterial $tableMaterial New table material (table row) */
                         $tableMaterial = new \samson\cms\CMSMaterial(false);
                         $tableMaterial->type = 3;
@@ -60,6 +65,9 @@ class App extends \samson\cms\App
                         $tableMaterial->parent_id = $material->MaterialID;
                         $tableMaterial->Published = 1;
                         $tableMaterial->Active = 1;
+                        $tableMaterial->UserID = $user->UserID;
+                        $tableMaterial->Created = date('Y-m-d H:m:s');
+                        $tableMaterial->Modyfied = $tableMaterial->Created;
                         $tableMaterial->save();
 
                         /** @var \samson\cms\CMSNavMaterial $structureMaterial Relation between created table material
