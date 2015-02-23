@@ -5,7 +5,7 @@
 function bindButtons(tab, response){
     tab.html(response.table);
     s('#material-tabs').tabs();
-    SamsonCMS_InputField(s('.__inputfield.__textarea'));
+    SamsonCMS_BindInput(tab);
     initMaterialTable(tab);
     initSort();
     loader.hide();

@@ -140,7 +140,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                         case '4':
                             /** @var \samson\cms\input\Select $input Select field type */
                             $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Select');
-                            $input->optionsFromString($materialField->Value);
+                            $input->optionsFromString($field->Value);
                             break;
                         case '1':
                             /** @var \samson\cms\input\File $input File field type */
@@ -158,7 +158,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                             /** @var \samson\cms\input\Field $input Numeric filed type */
                             $input = \samson\cms\input\Field::fromObject($materialField, 'numeric_value', 'Number');
                             break;
-                        default :
+                        default:
                             /** @var \samson\cms\input\Field $input Text filed type */
                             $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Field');
                     }
