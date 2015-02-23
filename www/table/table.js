@@ -5,7 +5,7 @@
 function bindButtons(tab, response){
     tab.html(response.table);
     s('#material-tabs').tabs();
-    SamsonCMS_BindInput(tab);
+    SamsonCMS_Input.update(tab);
     initMaterialTable(tab);
     initSort();
     loader.hide();
