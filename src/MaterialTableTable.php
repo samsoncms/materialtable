@@ -152,7 +152,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                             break;
                         case '6':
                             /** @var \samson\cms\input\Material $input Material field type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Material');
+                            $input = \samson\cms\input\Field::fromObject($materialField, 'key_value', 'Material');
                             break;
                         case '7':
                             /** @var \samson\cms\input\Field $input Numeric filed type */
