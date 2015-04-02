@@ -1,6 +1,7 @@
 <?php
 namespace samson\cms\web\materialtable;
 
+use samson\activerecord\dbQuery;
 use samson\pager\Pager;
 
 /**
@@ -15,6 +16,8 @@ class MaterialTableTable extends \samson\cms\table\Table
 
     /** Table row template */
     public $row_tmpl = 'table/row';
+
+    public $dbQuery;
 
     /** Existing CMSMaterial field records */
     private $fields = array();
@@ -40,6 +43,7 @@ class MaterialTableTable extends \samson\cms\table\Table
      */
     public function __construct(\samson\cms\CMSMaterial & $material, Pager $pager = null, $structure, $locale = 'ru')
     {
+        $this->dbQuery = new dbQuery();
         // Retrieve pointer to current module for rendering
         $this->renderModule = & s()->module($this->renderModule);
 
@@ -126,6 +130,7 @@ class MaterialTableTable extends \samson\cms\table\Table
     {
         /** @var string $tdHTML Table cell HTML code */
         $tdHTML = '';
+        $input = null;
 
         /** @var \samson\cms\CMSField $field Field of current table structure (Table column) */
         foreach ($this->fields as $field) {
@@ -135,32 +140,13 @@ class MaterialTableTable extends \samson\cms\table\Table
                 if ($materialField->FieldID == $field->FieldID &&
                     ($materialField->locale == $this->locale || ($field->local == 0 && $materialField->locale == ''))) {
 
-                    // Depending on field type
-                    switch ($field->Type) {
-                        case '4':
-                            /** @var \samson\cms\input\Select $input Select field type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Select');
-                            $input->optionsFromString($field->Value);
-                            break;
-                        case '1':
-                            /** @var \samson\cms\input\File $input File field type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'File');
-                            break;
-                        case '3':
-                            /** @var \samson\cms\input\Date $input Date field type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Date');
-                            break;
-                        case '6':
-                            /** @var \samson\cms\input\Material $input Material field type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'key_value', 'Material');
-                            break;
-                        case '7':
-                            /** @var \samson\cms\input\Field $input Numeric filed type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'numeric_value', 'Number');
-                            break;
-                        default:
-                            /** @var \samson\cms\input\Field $input Text filed type */
-                            $input = \samson\cms\input\Field::fromObject($materialField, 'Value', 'Field');
+                    if ($field->Type < 8) {
+                        $input = m('samsoncms_input_application')
+                            ->createFieldByType($this->dbQuery, $field->Type, $materialField);
+                    }
+                    if ($field->Type == 4) {
+                        /** @var \samsoncms\input\select\Select $input Select input type */
+                        $input->build();
                     }
 
                     // Set HTML row code
@@ -173,7 +159,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         // Render field row
         return $this->renderModule
             ->view($this->row_tmpl)
-            ->set(\samson\cms\input\Field::fromObject($material, 'Url', 'Field'), 'materialName')
+            ->set(m('samsoncms_input_text_application')->createField($this->dbQuery, $material, 'Url'), 'materialName')
             ->set('materialID', $material->id)
             ->set('parentID', $material->parent_id)
             ->set('structureId', $this->structure->StructureID)
