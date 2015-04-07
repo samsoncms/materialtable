@@ -1,7 +1,9 @@
 <?php
 namespace samson\cms\web\materialtable;
 
-use samson\cms\web\material\FormTab;
+use samsoncms\app\material\FormTab;
+use samsoncms\app\material\Form;
+
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
  * on 02.12.2014 at 12:40
@@ -14,15 +16,15 @@ class MaterialTableTab extends FormTab
 
     /**
      * Constructor
-     * @param \samson\cms\web\material\Form $form Pointer to form
+     * @param Form $form Pointer to form
      * @param \samson\cms\Navigation $structure Current tab table structure
      * @param FormTab $parent Pointer to parent tab object
      * @param string $locale Current locale
      */
-    public function __construct( \samson\cms\web\material\Form & $form, $structure, FormTab & $parent = null, $locale = null )
+    public function __construct(Form & $form, $structure, FormTab & $parent = null, $locale = null)
     {
         // Call parent constructor
-        parent::__construct( $form, $parent );
+        parent::__construct($form, $parent);
 
         // Save tab header name as locale name
         $this->name = $locale == '' ? t('все', true) : $locale;

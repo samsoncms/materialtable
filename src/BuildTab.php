@@ -1,7 +1,8 @@
 <?php
 namespace samson\cms\web\materialtable;
 
-use samson\cms\web\material\FormTab;
+use samsoncms\app\material\FormTab;
+use samsoncms\app\material\Form;
 
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
@@ -15,10 +16,10 @@ class BuildTab extends FormTab
 
     /**
      * Constructor
-     * @param \samson\cms\web\material\Form $form Current form object
+     * @param Form $form Current form object
      * @param FormTab $parent Parent tab object
      */
-    public function __construct(\samson\cms\web\material\Form & $form, FormTab & $parent = null)
+    public function __construct(Form & $form, FormTab & $parent = null)
     {
         // Call parent constructor
         parent::__construct($form, $parent);
