@@ -1,5 +1,6 @@
 <?php
 namespace samson\cms\web\materialtable;
+use samsoncms\app\material\Form;
 
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
@@ -148,8 +149,8 @@ class App extends \samson\cms\App
         /** @var array $result Asynchronous response */
         $result = array('status' => false);
 
-        /** @var \samson\cms\web\material\Form $form Create new form to update information */
-        $form = new \samson\cms\web\material\Form($materialId);
+        /** @var Form $form Create new form to update information */
+        $form = new Form($materialId);
 
         /** @var \samson\cms\Navigation $structure Current table structure */
         $structure = cmsnav($structureId, 'StructureId');
