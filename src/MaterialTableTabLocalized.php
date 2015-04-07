@@ -2,8 +2,9 @@
 namespace samson\cms\web\materialtable;
 
 use samson\activerecord\structure;
-use \samson\core\SamsonLocale;
-use \samson\cms\web\material\FormTab;
+use samson\core\SamsonLocale;
+use samsoncms\app\material\FormTab;
+use samsoncms\app\material\Form;
 
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
@@ -26,10 +27,10 @@ class MaterialTableTabLocalized extends FormTab
 
     /**
      * Constructor
-     * @param \samson\cms\web\material\Form $form Pointer to form
+     * @param Form $form Pointer to form
      * @param \samson\cms\Navigation $structure Pointer to parent tab
      */
-    public function __construct(\samson\cms\web\material\Form & $form, $structure)
+    public function __construct(Form & $form, $structure)
     {
         // Call parent constructor
         parent::__construct($form);
