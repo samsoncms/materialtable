@@ -7,7 +7,7 @@ use samsoncms\app\material\Form;
  * on 02.12.2014 at 12:03
  */
 
-class App extends \samson\cms\App
+class App extends \samsoncms\Application
 {
     /** Application name */
     public $name;

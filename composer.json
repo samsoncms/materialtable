@@ -3,10 +3,11 @@
     "description":"SamsonCMS MaterialTable application ",
     "author":"Maxim Omelchenko <omelchenko@samsonos.com>",
     "require":{
-        "samsonos/cms_app":"*",
+        "samsoncms/application":"*",
         "samsonos/cms_table":"*",
         "samsonos/cms_app_material":"*"
     },
+	"minimum-stability":"dev",
     "license":"Open Software License (OSL) v 3.0",
     "homepage":"http://samsonos.com/",
     "autoload": {
