@@ -66,7 +66,7 @@ class App extends \samsoncms\Application
                         $tableMaterial->parent_id = $material->MaterialID;
                         $tableMaterial->Published = 1;
                         $tableMaterial->Active = 1;
-                        $tableMaterial->UserID = $user->UserID;
+                        $tableMaterial->UserID = $user->id;
                         $tableMaterial->Created = date('Y-m-d H:m:s');
                         $tableMaterial->Modyfied = $tableMaterial->Created;
                         $tableMaterial->save();
