@@ -61,7 +61,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('Draft', 0)
             ->join('structurematerial')
             ->cond('structurematerial.StructureID', $structure->StructureID)
-            ->fieldsNew('MaterialID');
+            ->fields('MaterialID');
 
         // Set current table structure as input structure
         $this->structure = $structure;
