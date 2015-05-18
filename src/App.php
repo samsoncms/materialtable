@@ -1,6 +1,7 @@
 <?php
 namespace samson\cms\web\materialtable;
 use samsoncms\app\material\Form;
+use samsonphp\event\Event;
 
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
@@ -80,6 +81,8 @@ class App extends \samsoncms\Application
                         $structureMaterial->save();
                     }
                 }
+
+                Event::fire('samson.cms.web.materialtable.add', array($material->id));
                 // Set success status and return result
                 return array('status' => 1);
             }
@@ -105,6 +108,8 @@ class App extends \samsoncms\Application
         if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
             // Delete this table material with it's all relations to structures and fields
             $material->deleteWithRelations();
+
+            Event::fire('samson.cms.web.materialtable.delete', array($material->parent_id));
             // Set success status
             $result['status'] = true;
         }
