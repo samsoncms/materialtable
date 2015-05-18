@@ -4,7 +4,7 @@
 <!--        <th class="name">--><?php //t('Url')?><!--</th>-->
         <?php v('thView') ?>
         <th>
-            <?php t('Удаление') ?>
+            <?php t('Управление') ?>
         </th>
     </tr>
     </thead>
