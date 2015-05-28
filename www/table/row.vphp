@@ -1,10 +1,7 @@
-<tr row_id="<?php v('materialID') ?>">
-<!--    <td>-->
-<!--        --><?php //v('materialName_html') ?>
-<!--    </td>-->
+<div class="table2-row" row_id="<?php v('materialID') ?>">
     <?php iv('td_view') ?>
-    <td>
-        <a href="<?php url_base('material_table/delete', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="delete_table_material" title="<?php t('Удалить') ?>"> </a>
-        <a href="<?php url_base('material_table/copy', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="copy_table_material" title="<?php t('Копировать') ?>"> </a>
-    </td>
-</tr>
+    <div class="table2-col">
+        <a href="<?php url_base('material_table/delete', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="icon2 icon_16x16 icon-delete delete_table_material" title="<?php t('Удалить') ?>"> </a>
+        <a href="<?php url_base('material_table/copy', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="icon2 icon_16x16 icon2-copy copy_table_material" title="<?php t('Копировать') ?>"> </a>
+    </div>
+</div>
