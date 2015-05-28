@@ -1,12 +1,11 @@
-<table class="__samsoncms_table material_table_table">
-    <thead>
-    <tr>
-<!--        <th class="name">--><?php //t('Url')?><!--</th>-->
+<div class="table2 default custom-table2 material_table_table">
+    <div class="table2-row table2-header-row">
         <?php v('thView') ?>
-        <th>
+        <div class="table2-col table2-header-col">
             <?php t('Управление') ?>
-        </th>
-    </tr>
-    </thead>
-    <tbody __action_priority="<?php url_base('material_table', 'priority') ?>"><?php v('rows'); ?></tbody>
-</table>
+        </div>
+    </div>
+    <div class="table2-body" __action_priority="<?php url_base('material_table', 'priority') ?>">
+        <?php v('rows'); ?>
+    </div>
+</div>
