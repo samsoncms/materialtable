@@ -1,5 +1,6 @@
 <?php
 namespace samson\cms\web\materialtable;
+use samson\cms\web\materialtable\tab\MaterialTable;
 use samsoncms\app\material\Form;
 use samsonphp\event\Event;
 
@@ -22,10 +23,37 @@ class App extends \samsoncms\Application
     /** @see \samson\core\ExternalModule::init() */
     public function prepare(array $params = null)
     {
+        Event::subscribe('samsoncms.input.material.confirm', array($this, 'inputConfirm'));
+        Event::subscribe('samsoncms.material.form.created', array($this, 'tabBuilder'));
         // TODO: Change this logic to make tab loading more simple
         // Create new materialtable tabs object to load it
         //class_exists( ns_classname('MaterialTableTabLocalized','samson\cms\web\materialtable') );
         class_exists(ns_classname('BuildTab','samson\cms\web\materialtable'));
+    }
+
+    public function tabBuilder(\samsoncms\app\material\form\Form & $form)
+    {
+        $cmsMat = dbQuery('\samson\cms\CMSMaterial')
+            ->join('structurematerial')
+            ->join('\samson\cms\Navigation')
+            ->cond('MaterialID', $form->entity->id)
+            ->first();
+
+        if (isset($cmsMat['onetomany']) && isset($cmsMat['onetomany']['_structure'])) {
+            foreach ($cmsMat['onetomany']['_structure'] as $structure) {
+                if ($structure->type == 2) {
+                    $form->tabs[] = new MaterialTable($this, dbQuery(''), $cmsMat, $structure);
+                }
+            }
+        }
+    }
+
+    public function inputConfirm($id)
+    {
+        $mf = dbQuery('materialfield')->cond('MaterialFieldID', $id)->first();
+        $material = dbQuery('material')->cond('MaterialID', $mf->MaterialID)->first();
+        $material->Active = 1;
+        $material->save();
     }
 
     /**
