@@ -182,20 +182,17 @@ class App extends \samsoncms\Application
         /** @var array $result Asynchronous response */
         $result = array('status' => false);
 
-        /** @var Form $form Create new form to update information */
-        $form = new Form($materialId);
-
         /** @var \samson\cms\Navigation $structure Current table structure */
-        $structure = cmsnav($structureId, 'StructureId');
+        $structure = dbQuery('\samson\cms\Navigation')->cond('StructureID', $structureId)->first();
+        $material = dbQuery('\samson\cms\Material')->cond('MaterialID', $materialId)->first();
 
         // If such structure exists
         if (isset($structureId)) {
             /** @var MaterialTableTabLocalized $tab New tab with updated table */
-            $tab = new MaterialTableTabLocalized($form, $structure);
+            $tab = new MaterialTable($this, dbQuery('\samson\cms\CMSMaterial'), $material, $structure);
 
             // Get HTML code of this tab
-            $content = $tab->getContent();
-
+            $content = $tab->content();
             // Set success status and generated HTML
             $result['status'] = true;
             $result['table'] = $content;

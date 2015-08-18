@@ -40,6 +40,8 @@ class MaterialTableLocalized extends Generic
             $this->name = 'all';
         }
 
+        $this->id .= $structure->Url != '' ? '_'.$structure->Url : '_'.$structure->Name;
+
         $this->structure = $structure;
 
         // Call parent constructor to define all class fields

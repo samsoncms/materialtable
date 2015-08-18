@@ -2,11 +2,17 @@
 * Created by omelchenko on 03.12.2014.
 */
 
+function materialTableUpdateTabs(parent, response)
+{
+    response = s(response.table);
+    s('.sub-tab-content', parent).each(function(subTab) {
+        subTab.html(s('#'+subTab.a('id'), response).html());
+        initMaterialTable(subTab);
+    });
+    SamsonCMS_Input.update(parent);
+}
 function bindButtons(tab, response){
-    tab.html(response.table);
-    s('#material-tabs').tabs();
-    SamsonCMS_Input.update(tab);
-    initMaterialTable(tab);
+    materialTableUpdateTabs(tab.parent(), response);
     initSort();
     loader.hide();
 }
@@ -32,8 +38,8 @@ function initMaterialTable(tab){
     });
 }
 
-s('.tab-group-content').pageInit(function(tab){
-    initMaterialTable(tab);
+s('.material_table_tab').pageInit(function(tab){
+    initMaterialTable(tab.parent());
     initSort();
 });
 
