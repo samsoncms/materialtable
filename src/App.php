@@ -25,10 +25,6 @@ class App extends \samsoncms\Application
     {
         Event::subscribe('samsoncms.input.material.confirm', array($this, 'inputConfirm'));
         Event::subscribe('samsoncms.material.form.created', array($this, 'tabBuilder'));
-        // TODO: Change this logic to make tab loading more simple
-        // Create new materialtable tabs object to load it
-        //class_exists( ns_classname('MaterialTableTabLocalized','samson\cms\web\materialtable') );
-        class_exists(ns_classname('BuildTab','samson\cms\web\materialtable'));
     }
 
     public function tabBuilder(\samsoncms\app\material\form\Form & $form)
