@@ -29,6 +29,8 @@ class MaterialTable extends Generic
     /** @inheritdoc */
     public function __construct(RenderInterface $renderer, QueryInterface $query, Record $entity, Navigation $structure)
     {
+        $this->name = $structure->Name;
+        $this->id .= $structure->Url != '' ? '_'.$structure->Url : '_'.$structure->Name;
         $this->structure = $structure;
         $nonLocalizedFieldsCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_local', 0)->count();
         $localizedFieldsCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_local', 1)->count();

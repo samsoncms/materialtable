@@ -22,6 +22,8 @@ class MaterialTableTable extends \samson\cms\table\Table
 
     public $dbQuery;
 
+    private $headerFields = array();
+
     /** Existing CMSMaterial field records */
     private $fields = array();
 
@@ -145,9 +147,10 @@ class MaterialTableTable extends \samson\cms\table\Table
             foreach ($material->onetomany['_materialfield'] as $materialField) {
                 // If materialfield relates to field (column) and has same locale or doesn't have it
                 if ($materialField->FieldID == $field->FieldID &&
-                    ($materialField->locale == $this->locale || ($field->local == 0 && $materialField->locale == ''))
+                    ($materialField->locale == $this->locale || ($field->local == 0 && $this->locale == ''))
                 ) {
 
+                    $this->headerFields[$field->id] = $field;
                     if ($field->Type < 8) {
                         $input = m('samsoncms_input_application')
                             ->createFieldByType($this->dbQuery, $field->Type, $materialField);
@@ -209,7 +212,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         $thHTML = '';
 
         /** @var \samson\cms\CMSField $field Table structure fields */
-        foreach ($this->fields as $field) {
+        foreach ($this->headerFields as $field) {
             $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $field->Description)->output();
         }
 
