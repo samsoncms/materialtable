@@ -118,7 +118,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
             ->cond('Active', 1)
-            ->order_by('priority')
+            ->order_by('MaterialID')
             ->join('materialfield');
         // With specified fields if they exist
         if (!empty($this->fields)) {
