@@ -39,6 +39,7 @@ class App extends \samsoncms\Application
             foreach ($cmsMat['onetomany']['_structure'] as $structure) {
                 if ($structure->type == 2) {
                     $form->tabs[] = new MaterialTable($this, dbQuery(''), $cmsMat, $structure);
+
                 }
             }
         }
@@ -50,6 +51,40 @@ class App extends \samsoncms\Application
         $material = dbQuery('material')->cond('MaterialID', $mf->MaterialID)->first();
         $material->Active = 1;
         $material->save();
+    }
+
+
+    /**
+     * Get max priority by current structure
+     * @param $materialId
+     * @param $structureId
+     * @return int
+     */
+    public function getMaxPriority($materialId, $structureId)
+    {
+        // Get all table materials identifiers from current form material
+        $tableMaterialIds = dbQuery('material')
+            ->cond('parent_id', $materialId)
+            ->cond('type', 3)
+            ->cond('Active', 1)
+            ->cond('Draft', 0)
+            ->join('structurematerial')
+            ->cond('structurematerial.StructureID', $structureId)
+            ->fields('MaterialID');
+
+        $material = null;
+        if (
+            dbQuery('material')
+                ->cond('MaterialID', $tableMaterialIds)
+                ->cond('Active', 1)
+                ->order_by('priority', 'DESC')
+                ->join('materialfield')
+                ->first($material)
+        ) {
+            return $material->priority;
+        }
+        return 0;
+
     }
 
     /**
@@ -83,6 +118,9 @@ class App extends \samsoncms\Application
                         /** @var \samson\activerecord\user $user User object */
                         $user = $socialModule->user();
 
+                        // Get max priority of this structure
+                        $maxPriority = $this->getMaxPriority($materialId, $structureId);
+
                         /** @var \samson\cms\CMSMaterial $tableMaterial New table material (table row) */
                         $tableMaterial = new \samson\cms\CMSMaterial(false);
                         $tableMaterial->type = 3;
@@ -91,6 +129,7 @@ class App extends \samsoncms\Application
                         $tableMaterial->parent_id = $material->MaterialID;
                         $tableMaterial->Published = 1;
                         $tableMaterial->Active = 1;
+                        $tableMaterial->priority = $maxPriority+1;
                         $tableMaterial->UserID = $user->id;
                         $tableMaterial->Created = date('Y-m-d H:m:s');
                         $tableMaterial->Modyfied = $tableMaterial->Created;
@@ -276,13 +315,13 @@ class App extends \samsoncms\Application
             // If locale is not set and none localized flag is true
             // Or if locale is set and localized flag is true
             // Render table to get it's HTML code
-            if (($locale == '' && $all) || ($locale != '' && $multilingual)) {
+            //if (($locale == '' && $all) || ($locale != '' && $multilingual)) {
                 return m('material_table')->view('tab_view')
                     ->set('table', $table->render())
                     ->set('materialId', $materialId)
                     ->set('structureId', $structure->StructureID)
                     ->output();
-            }
+            //}
         }
         // Return empty string on fail
         return '';

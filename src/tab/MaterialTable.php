@@ -32,17 +32,19 @@ class MaterialTable extends Generic
         $this->name = $structure->Name;
         $this->id .= $structure->Url != '' ? '_'.$structure->Url : '_'.$structure->Name;
         $this->structure = $structure;
-        $nonLocalizedFieldsCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_local', 0)->count();
+
+        $fieldWithMaterialCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_Type', 6)->count();
         $localizedFieldsCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_local', 1)->count();
 
-        // If we have not localized fields
-        if ($nonLocalizedFieldsCount > 0) {
+        // If in this tab exists only material type field and don't exists localized fields
+        if ($fieldWithMaterialCount > 0 && ($localizedFieldsCount == 0)) {
             // Create default sub tab
             $this->subTabs[] = new MaterialTableLocalized($renderer, $query, $entity, $structure, '');
         }
 
-        // Iterate available locales if we have localized fields
-        if (sizeof(SamsonLocale::$locales) && $localizedFieldsCount > 0) {
+        // If in this tab exists not material type fields and this fields localized then include their
+        if (($fieldWithMaterialCount == 0) || ($localizedFieldsCount > 0)) {
+            // Iterate available locales if we have localized fields
             foreach (SamsonLocale::$locales as $locale) {
                 // Create child tab
                 $subTab = new MaterialTableLocalized($renderer, $query, $entity, $structure, $locale);

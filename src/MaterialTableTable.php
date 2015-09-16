@@ -90,10 +90,9 @@ class MaterialTableTable extends \samson\cms\table\Table
                     ->cond('FieldID', $field->id)
                     ->first()
                 ) {
-
                     // If locale is set and field is localized
                     // Or if locale is not set and isn't localized
-                    if (($locale != '' && $field->local == 1 || $locale == '' && $field->local == 0)) {
+                    //if (($locale != '' && $field->local == 1 || $locale == '' && $field->local == 0)) {
 
                         /** @var \samson\activerecord\materialfield $materialField Create material field record */
                         $materialField = new \samson\activerecord\materialfield(false);
@@ -106,7 +105,9 @@ class MaterialTableTable extends \samson\cms\table\Table
                         }
                         // Write it to DataBase
                         $materialField->save();
-                    }
+                    //}
+                } else {
+
                 }
             }
         }
@@ -118,7 +119,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->cond('parent_id', $this->material->id)
             ->cond('type', 3)
             ->cond('Active', 1)
-            ->order_by('MaterialID')
+            ->order_by('priority')
             ->join('materialfield');
         // With specified fields if they exist
         if (!empty($this->fields)) {
@@ -128,6 +129,7 @@ class MaterialTableTable extends \samson\cms\table\Table
         // Constructor treed
         parent::__construct($this->query);
     }
+
 
     /**
      * Function to view table row
@@ -145,19 +147,27 @@ class MaterialTableTable extends \samson\cms\table\Table
         foreach ($this->fields as $field) {
             /** @var \samson\activerecord\materialfield $materialField Materialfield object (Table cell) */
             foreach ($material->onetomany['_materialfield'] as $materialField) {
-                // If materialfield relates to field (column) and has same locale or doesn't have it
-                if ($materialField->FieldID == $field->FieldID &&
-                    ($materialField->locale == $this->locale || ($field->local == 0 && $this->locale == ''))
-                ) {
+
+                // If materialfield relates to field (column)
+                $isRightField = $materialField->FieldID == $field->FieldID;
+
+                // If field has same locale as passed
+                $isRightLocale = $materialField->locale == $this->locale;
+
+                // If field not localized then output it
+                $isNotLocalizedField = $materialField->locale == '';
+
+                if ($isRightField && (($isRightLocale) || ($isNotLocalizedField))) {
 
                     $this->headerFields[$field->id] = $field;
                     if ($field->Type < 8) {
                         $input = m('samsoncms_input_application')
                             ->createFieldByType($this->dbQuery, $field->Type, $materialField);
                     }
+                    // If current field has select type then go to build his value
                     if ($field->Type == 4) {
                         /** @var \samsoncms\input\select\Select $input Select input type */
-                        $input->build();
+                        $input->build($field->Value);
                     }
 
                     // Set HTML row code
@@ -213,9 +223,16 @@ class MaterialTableTable extends \samson\cms\table\Table
 
         /** @var \samson\cms\CMSField $field Table structure fields */
         foreach ($this->headerFields as $field) {
-            $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $field->Description)->output();
-        }
 
+            $description = $field->Description;
+
+            // If its not localized field then show prefix on the name of field
+            if ($field->local == 0) {
+                $description .= " [".t('Общие', true)."]";
+            }
+
+            $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $description)->output();
+        }
 
         // Get all table materials
         //$defaultMaterialQuery = dbQuery('material')
@@ -255,6 +272,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             m('material_table')->__async_add($this->material->id, $this->structure->id, 2, $defaultMaterial);
 
             foreach ($this->fields as $field) {
+
                 /** @var \samson\activerecord\materialfield $materialField Create material field record */
                 $materialField = new \samson\activerecord\materialfield(false);
                 $materialField->MaterialID = $defaultMaterial->id;
