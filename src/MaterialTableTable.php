@@ -182,6 +182,7 @@ class MaterialTableTable extends \samson\cms\table\Table
             ->view($this->row_tmpl)
             ->set(m('samsoncms_input_text_application')->createField($this->dbQuery, $material, 'Url'), 'materialName')
             ->set('materialID', $material->id)
+            ->set('priority', $material->priority)
             ->set('parentID', $material->parent_id)
             ->set('structureId', $this->structure->StructureID)
             ->set('td_view', $tdHTML)

@@ -245,7 +245,8 @@ class App extends \samsoncms\Application
         // If we have changed priority of rows
         if (isset($_POST['ids'])) {
             // For each received row id
-            for ($i = 0; $i < count($_POST['ids']); $i++) {
+            for ($i = 1; $i <= count($_POST['ids']); $i++) {
+
                 /** @var \samson\activerecord\material $material Variable to store material */
                 $material = null;
                 // If we have such material in database

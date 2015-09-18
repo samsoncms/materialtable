@@ -1,84 +1,219 @@
 /**
-* Created by omelchenko on 03.12.2014.
-*/
+ * Created by omelchenko on 03.12.2014.
+ */
 
-function materialTableUpdateTabs(parent, response)
-{
+function materialTableUpdateTabs(parent, response) {
     response = s(response.table);
-    s('.sub-tab-content', parent).each(function(subTab) {
-        subTab.html(s('#'+subTab.a('id'), response).html());
+    s('.sub-tab-content', parent).each(function (subTab) {
+        subTab.html(s('#' + subTab.a('id'), response).html());
         initMaterialTable(subTab);
     });
     SamsonCMS_Input.update(parent);
 }
-function bindButtons(tab, response){
+function bindButtons(tab, response) {
     materialTableUpdateTabs(tab.parent(), response);
-    initSort();
+    updatePriorityOnChange(tab);
+    initSortable(savePriority);
     loader.hide();
 }
 
-function initMaterialTable(tab){
+function initMaterialTable(tab) {
     s('.delete_table_material', tab).ajaxClick(function (response) {
         bindButtons(tab, response);
-    }, function(){
+    }, function () {
         loader.show('', true);
         return true;
     });
     s('.material_table_add', tab).ajaxClick(function (response) {
         bindButtons(tab, response);
-    }, function(){
+    }, function () {
         loader.show('', true);
         return true;
     });
     s('.copy_table_material', tab).ajaxClick(function (response) {
         bindButtons(tab, response);
-    }, function(){
+    }, function () {
         loader.show('', true);
         return true;
     });
 }
 
-s('.material_table_tab').pageInit(function(tab){
+s('.material_table_tab').pageInit(function (tab) {
     initMaterialTable(tab.parent());
-    initSort();
+    initSortable(savePriority);
 });
 
-function initSort() {
-    $('.material_table_table tbody').each(function (idx, table) {
-        table = $(table);
-        table.sortable({
-            axis: 'y',
-            scroll: true,
-            cursor: 'move',
-            containment: 'parent',
-            delay: 150,
-            stop: function () {
-                loader.show('', true);
-                if (table.attr('__action_priority')) {
-                    var priorityUrl = table.attr('__action_priority')
-                } else {
-                    console.error('No priority URL was set, please add "__action_priority" attribute and proper URL to table');
-                }
-                var ids = [];
-                table.find('tr').each(function (idx, row) {
-                    row = $(row);
-                    if (row.attr('row_id')) {
-                        ids[idx] = row.attr('row_id');
-                    }
-                });
-                $.ajax({
-                    url: priorityUrl,
-                    type: 'POST',
-                    async: true,
-                    data: {ids: ids},
-                    headers: {
-                        'SJSAsync': 'true'
-                    },
-                    success: function () {
-                        loader.hide();
-                    }
-                });
+function updatePriorityOnChange(tab){
+
+    s('.sub-tab-content', tab.parent()).each(function(e){
+        changePriority(s('.priority_table_material', e));
+        savePriority(tab);
+    });
+}
+
+/**
+ * Calls when need save new priority
+ * @param tab
+ */
+function savePriority(tab) {
+
+    // Get all items in the tab
+    var items = s('.priority_table_material', tab);
+
+    // Get link to save priority elements
+    var prioritySaveUrl = items.elements[0].a('data-href');
+
+    // Get data
+    var data = {};
+    items.each(function (e) {
+        data[s(e).a('data-priority')] = s(e).a('data-material');
+    });
+
+    // Show loader
+    loader.show('', true);
+
+    // Save priority of items
+    $.ajax({
+        url: prioritySaveUrl,
+        type: 'POST',
+        async: true,
+        data: {ids: data},
+        headers: {
+            'SJSAsync': 'true'
+        },
+        success: function () {
+            loader.hide();
+        }
+    });
+}
+
+/**
+ * Init events on the item which have to be draggable
+ * @param onEndAction Callback which will be use when user drag some item
+ */
+function initSortable(onEndAction) {
+
+    // List with handle
+    var id = 'template-form';
+
+    // Get dom of main block
+    var mainBlocks = document.getElementsByClassName(id);
+
+    // Iterate all blocks
+    for (var blockKey in mainBlocks) {
+
+        // Get value
+        var block = mainBlocks[blockKey];
+
+        // Exclude field tab
+        if (s(block).parent()) {
+            if (s(block).parent().parent().a('id') == 'field_tab') {
+                continue;
             }
-        });
+        }
+
+        // User closure for store correct value of block
+        (function (block) {
+
+            // Iterate all sub tabs
+            var countOfTable = 0;
+            s('.sub-tab-content', s(block)).each(function (tab) {
+
+                // Store count of tab
+                countOfTable++;
+
+                // Iterate table
+                s('.table2-body', s(tab)).each(function (table) {
+
+                    // User closure for store correct value of table
+                    (function (countOfTable) {
+
+                        // Bind sortable plugin on dom element of item
+                        Sortable.create(table.DOMElement, {
+                            animation: 150,
+
+                            // After do action
+                            onEnd: function (e) {
+
+                                // Store initiate values
+                                var oldIndex = e.oldIndex;
+                                var newIndex = e.newIndex;
+
+
+                                // Iterate all tables and synchronize all item as in the block
+                                // where the moving was doing
+                                var items = s('.priority_table_material', table);
+                                var countOfNewTable = 0;
+                                s('.table2-body', s(block)).each(function (tableNew) {
+                                    countOfNewTable++;
+
+                                    // If it is the current block go further else synchronize
+                                    if (countOfNewTable == countOfTable) {
+                                        return;
+                                    }
+
+                                    // Length of items on the list
+                                    var items = s('.table2-row', tableNew);
+                                    var length = items.elements.length;
+
+                                    // Set logical values
+                                    var isStartElement = newIndex == 0;
+                                    var isEndElement = newIndex == length - 1;
+                                    var isMiddleElement = !isStartElement && !isEndElement;
+                                    var isFixMove = newIndex - oldIndex < 0;
+
+                                    // If element located in the middle of list not on the edge
+                                    if (isMiddleElement) {
+
+                                        // Fix moving on one position
+                                        if (isFixMove) {
+                                            items.elements[newIndex].insertBefore(items.elements[oldIndex]);
+                                        } else {
+                                            items.elements[newIndex + 1].insertBefore(items.elements[oldIndex]);
+                                        }
+
+                                        // End edge
+                                    } else if (isEndElement) {
+
+                                        jQuery(items.elements[oldIndex].DOMElement)
+                                            .insertAfter(items.elements[length - 1].DOMElement);
+
+                                        // Start edge
+                                    } else if (isStartElement) {
+                                        items.elements[newIndex].insertBefore(items.elements[oldIndex]);
+                                    }
+
+                                    // Change priority on the items of list
+                                    changePriority(s('.priority_table_material', tableNew));
+                                });
+
+                                // Change priority in table
+                                changePriority(items);
+
+                                // Call passed callback
+                                onEndAction(tab);
+                            }
+                        });
+                    })(countOfTable);
+                });
+            });
+        })(block);
+    }
+}
+
+/**
+ * Change priority in table
+ * @param element
+ */
+function changePriority(element) {
+
+    // Start value of priority
+    var priority = 1;
+
+    // Iterate all items and change priority in the each element
+    element.each(function (v) {
+        v.a('data-priority', priority);
+        v.html(priority);
+        priority++;
     });
 }
