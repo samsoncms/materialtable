@@ -27,7 +27,7 @@ class MaterialTable extends Generic
     protected $structure;
 
     /** @var string path to tab header view */
-    public $headerContentView = 'table/main/content';
+    public $headerContentView = 'table/header/content';
 
     /** @inheritdoc */
     public function __construct(RenderInterface $renderer, QueryInterface $query, Record $entity, Navigation $structure)

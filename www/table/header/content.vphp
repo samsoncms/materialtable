@@ -1,0 +1,2 @@
+<span class="<?php iv('headUrl') ?>" data-current-locale="<?php echo locale() ?>"><?php iv('headName') ?> <b></b></span>
+<div class="blockSubTabs"></div>
