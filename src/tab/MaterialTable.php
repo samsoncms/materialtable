@@ -40,29 +40,6 @@ class MaterialTable extends Generic
         $fieldWithMaterialCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_Type', 6)->count();
         $localizedFieldsCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_local', 1)->count();
 
-
-        // Get all fields of table structure
-        dbQuery('field')->join('structurefield')->cond('StructureID', $structure->StructureID)->exec($structureFields);
-
-        $fields = array();
-
-        /** @var \samson\cms\CMSField $field Field object */
-        foreach ($structureFields as $field) {
-            // Add field to fields collection
-            $fields[$field->id] = $field;
-        }
-
-        $countOfFields = dbQuery('material')
-            ->cond('parent_id', $entity->id)
-            ->cond('type', 3)
-            ->cond('Active', 1)
-            ->order_by('priority')
-            ->join('materialfield');
-
-        $countOfFields->cond('materialfield.FieldID', array_keys($fields));
-
-        $this->countOfFields = sizeof($countOfFields->exec());
-
         // If in this tab exists only material type field or don't exists localized fields
         if ($fieldWithMaterialCount > 0 || ($localizedFieldsCount == 0)) {
 
