@@ -96,29 +96,36 @@ class App extends \samsoncms\Application
 
     public function __async_quantityFieldsRow($structureId, $entityID)
     {
+        $structureFields = null;
+
         // Get all fields of table structure
-        dbQuery('field')->join('structurefield')->cond('StructureID', $structureId)->exec($structureFields);
+        if ($this->query->className('field')
+            ->join('structurefield')
+            ->cond('StructureID', $structureId)
+            ->exec($structureFields)
+        ) {
 
-        $fields = array();
+            $fields = array();
 
-        /** @var \samson\cms\CMSField $field Field object */
-        foreach ($structureFields as $field) {
-            // Add field to fields collection
-            $fields[$field->id] = $field;
+            /** @var \samson\cms\CMSField $field Field object */
+            foreach ($structureFields as $field) {
+                // Add field to fields collection
+                $fields[$field->id] = $field;
+            }
+
+            $countOfFields = $this->query->className('material')
+                ->cond('parent_id', $entityID)
+                ->cond('type', 3)
+                ->cond('materialfield.FieldID', array_keys($fields))
+                ->cond('Active', 1)
+                ->join('materialfield')
+                ->group_by('MaterialID')
+                ->count();
+
+            return array('status' => 1, 'countOfFields' => $countOfFields);
+        } else {
+            return array('status' => 0);
         }
-
-        $countOfFields = dbQuery('material')
-            ->cond('parent_id', $entityID)
-            ->cond('type', 3)
-            ->cond('Active', 1)
-            ->order_by('priority')
-            ->join('materialfield');
-
-        $countOfFields->cond('materialfield.FieldID', array_keys($fields));
-
-        $countOfFields = sizeof($countOfFields->exec());
-
-        return array('status' => 1, 'countOfFields' => $countOfFields);
     }
 
     /**
@@ -133,7 +140,7 @@ class App extends \samsoncms\Application
         $material = null;
 
         // If there are no such row yet
-        if (dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
+        if ($this->query->className('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
 
             /** @var array $structures Array of structures of this material */
             $structures = $material->cmsnavs();
@@ -202,7 +209,7 @@ class App extends \samsoncms\Application
         $material = null;
 
         // If such material exists
-        if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+        if ($this->query->className('\samson\cms\CMSMaterial')->id($id)->first($material)) {
             // Delete this table material with it's all relations to structures and fields
             $material->deleteWithRelations();
 
@@ -228,7 +235,7 @@ class App extends \samsoncms\Application
         $material = null;
 
         // If such material exists
-        if (dbQuery('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+        if ($this->query->className('\samson\cms\CMSMaterial')->id($id)->first($material)) {
             // Make copy of this material
             /** @var \samson\cms\CMSMaterial $copy Copy of existing material */
             $copy = $material->copy();
@@ -252,13 +259,13 @@ class App extends \samsoncms\Application
         $result = array('status' => false);
 
         /** @var \samson\cms\Navigation $structure Current table structure */
-        $structure = dbQuery('\samson\cms\Navigation')->cond('StructureID', $structureId)->first();
-        $material = dbQuery('\samson\cms\Material')->cond('MaterialID', $materialId)->first();
+        $structure = $this->query->className('\samson\cms\Navigation')->cond('StructureID', $structureId)->first();
+        $material = $this->query->className('\samson\cms\Material')->cond('MaterialID', $materialId)->first();
 
         // If such structure exists
         if (isset($structureId)) {
             /** @var MaterialTableTabLocalized $tab New tab with updated table */
-            $tab = new MaterialTable($this, dbQuery('\samson\cms\CMSMaterial'), $material, $structure);
+            $tab = new MaterialTable($this, $this->query->className('\samson\cms\CMSMaterial'), $material, $structure);
 
             // Get HTML code of this tab
             $content = $tab->content();
@@ -284,7 +291,7 @@ class App extends \samsoncms\Application
                 /** @var \samson\activerecord\material $material Variable to store material */
                 $material = null;
                 // If we have such material in database
-                if (dbQuery('material')->cond('MaterialID', $_POST['ids'][$i])->first($material)) {
+                if ($this->query->className('material')->cond('MaterialID', $_POST['ids'][$i])->first($material)) {
                     // Reset it's priority and save it
                     $material->priority = $i;
                     $material->save();
@@ -313,7 +320,7 @@ class App extends \samsoncms\Application
         $material = null;
 
         // If material was found by identifier
-        if (dbQuery('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
+        if ($this->query->className('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
 
             /** @var MaterialTableTable $table Current table object */
             $table = new MaterialTableTable($material, null, $structure, $locale);
@@ -324,7 +331,7 @@ class App extends \samsoncms\Application
             $multilingual = false;
 
             // If there is relation between current material and current table structure
-            if (dbQuery('\samson\cms\CMSNavMaterial')
+            if ($this->query->className('\samson\cms\CMSNavMaterial')
                 ->cond('MaterialID', $materialId)
                 ->join('structure')
                 ->cond('StructureID', $structure->StructureID)
@@ -332,14 +339,14 @@ class App extends \samsoncms\Application
             ) {
 
                 // If table structure has at least one none localized field
-                if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
+                if ($this->query->className('structurefield')->cond('StructureID', $structure->StructureID)
                     ->join('field')->cond('field_local', 0)->first()
                 ) {
                     // Set non-localized flag to true
                     $all = true;
                 }
                 // If table structure has at least one localized field
-                if (dbQuery('structurefield')->cond('StructureID', $structure->StructureID)
+                if ($this->query->className('structurefield')->cond('StructureID', $structure->StructureID)
                     ->join('field')->cond('field_local', 1)->first()
                 ) {
                     // Set localized flag to true
