@@ -14,6 +14,7 @@ function bindButtons(tab, response) {
     materialTableUpdateTabs(tab.parent(), response);
     updatePriorityOnChange(tab);
     initSortable(savePriority);
+    reloadQuantityFields(tab);
     loader.hide();
 }
 
@@ -216,4 +217,45 @@ function changePriority(element) {
         v.html(priority);
         priority++;
     });
+}
+
+s(document).pageInit(function(){
+    s('.blockSubTabs').each(function(subTab){
+        reloadQuantityFields(subTab);
+    });
+});
+
+function reloadQuantityFields (elm) {
+
+    var elmParent = s(elm).parent('template-block');
+    var countBlock = s('.tab-header > span b', elmParent);
+    var structureID = s('.structureID', elmParent).val();
+    var entityId = s('.entityID', elmParent).val();
+
+
+
+    if (structureID != undefined && entityId != undefined && structureID >= 0 && entityId >=0) {
+        $.ajax({
+            url: '/cms/material_table/quantityFieldsRow/' + structureID + '/' +entityId,
+            type: 'POST',
+            async: true,
+            headers: {
+                'SJSAsync': 'true'
+            },
+            success: function (data) {
+                data = JSON.parse(data);
+                if (data['result'] = 1) {
+                    if (data['countOfFields'] <= 0) {
+                        countBlock.html('');
+                    } else {
+                        countBlock.html('('+data['countOfFields']+')');
+                    }
+                } else {
+                    console.log('BAD request');
+                }
+            }
+        });
+    } else {
+        console.log('BAD request');
+    }
 }

@@ -26,6 +26,9 @@ class MaterialTable extends Generic
     /** @var Navigation Current tab navigation object  */
     protected $structure;
 
+    /** @var string path to tab header view */
+    public $headerContentView = 'table/header/content';
+
     /** @inheritdoc */
     public function __construct(RenderInterface $renderer, QueryInterface $query, Record $entity, Navigation $structure)
     {
