@@ -88,6 +88,40 @@ class App extends \samsoncms\Application
     }
 
     /**
+     * Update quantity fields table row
+     * @param int $structureId Current table structure identifier
+     * @param int $entityID Current table entity identifier
+     * @return array AJAX response
+     */
+
+    public function __async_quantityFieldsRow($structureId, $entityID)
+    {
+        // Get all fields of table structure
+        dbQuery('field')->join('structurefield')->cond('StructureID', $structureId)->exec($structureFields);
+
+        $fields = array();
+
+        /** @var \samson\cms\CMSField $field Field object */
+        foreach ($structureFields as $field) {
+            // Add field to fields collection
+            $fields[$field->id] = $field;
+        }
+
+        $countOfFields = dbQuery('material')
+            ->cond('parent_id', $entityID)
+            ->cond('type', 3)
+            ->cond('Active', 1)
+            ->order_by('priority')
+            ->join('materialfield');
+
+        $countOfFields->cond('materialfield.FieldID', array_keys($fields));
+
+        $countOfFields = sizeof($countOfFields->exec());
+
+        return array('status' => 1, 'countOfFields' => $countOfFields);
+    }
+
+    /**
      * Creating new material table row
      * @param int $materialId Current material identifier
      * @param int $structureId Current table structure identifier

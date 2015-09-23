@@ -4,3 +4,5 @@
 <a class="material_table_add" href="<?php url_base('material_table/add', 'materialId', 'structureId', 'material_table/table', 'materialId', 'structureId') ?>">
     <?php t('Добавить строку таблицы') ?>
 </a>
+<input type="hidden" class="structureID" value="<?php iv('structureId')?>">
+<input type="hidden" class="entityID" value="<?php iv('materialId')?>">
