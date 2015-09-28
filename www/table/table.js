@@ -16,6 +16,37 @@ function bindButtons(tab, response) {
     initSortable(savePriority);
     reloadQuantityFields(tab);
     loader.hide();
+
+    // Init selectify plugin
+    s('.material-structure-selectify', tab).each(function(el){
+        el.selectify();
+
+        initLinks(el.prev());
+
+        s('._sjsselect_dropdown li', el.prev()).each(function(li) {
+            if (!li.hasClass('selectify-loaded')) {
+                li.click(function(li) {
+                    s.ajax(el.a('data-href-add') + '/' + li.a('value'), function(response) {
+                        initLinks(el.prev());
+                    });
+                    li.addClass('selectify-loaded');
+                });
+            }
+        });
+
+        function initLinks(block) {
+            s('._sjsselect ._sjsselect_delete', block).each(function(link) {
+                if (!link.hasClass('selectify-loaded')) {
+                    link.click(function(link) {
+                        s.ajax(select.a('data-href-remove') + '/' + link.a('value'), function(response) {
+                        });
+                        link.addClass('selectify-loaded');
+                    });
+                }
+            });
+        }
+    });
+
 }
 
 function initMaterialTable(tab) {
