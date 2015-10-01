@@ -269,6 +269,10 @@ class App extends \samsoncms\Application
 
             // Get HTML code of this tab
             $content = $tab->content();
+            
+            // If need change content
+            Event::fire('samson.cms.web.materialtable.get.table', array($materialId, $structureId, & $content));
+            
             // Set success status and generated HTML
             $result['status'] = true;
             $result['table'] = $content;
