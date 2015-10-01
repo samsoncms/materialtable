@@ -186,7 +186,7 @@ class App extends \samsoncms\Application
                     }
                 }
 
-                Event::fire('samson.cms.web.materialtable.add', array($material->id));
+                Event::fire('samson.cms.web.materialtable.add', array($material->id, $structureId));
                 // Set success status and return result
                 return array('status' => 1);
             }
