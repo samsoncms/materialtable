@@ -70,10 +70,13 @@ function initMaterialTable(tab) {
     });
 }
 
-s('.material_table_tab').pageInit(function (tab) {
+s('.material_table_tab').pageInit(updateTable);
+
+function updateTable(tab) {
     initMaterialTable(tab.parent());
     initSortable(savePriority);
-});
+}
+
 
 function updatePriorityOnChange(tab){
 
