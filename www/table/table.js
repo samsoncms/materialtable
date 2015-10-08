@@ -70,13 +70,22 @@ function initMaterialTable(tab) {
     });
 }
 
-s('.material_table_tab').pageInit(updateTable);
+SamsonCMS_InputQUANTITY = function() {
+    s('.blockSubTabs').each(function(subTab){
+        reloadQuantityFields(subTab);
+    });
+};
 
-function updateTable(tab) {
+SamsonCMS_InputMATERIAL_TABLE = function(tab) {
     initMaterialTable(tab.parent());
     initSortable(savePriority);
-}
+};
 
+// Bind input
+SamsonCMS_Input.bind(SamsonCMS_InputMATERIAL_TABLE, '.material_table_tab');
+
+// Bind input
+SamsonCMS_Input.bind(SamsonCMS_InputQUANTITY, '.material_table_tab');
 
 function updatePriorityOnChange(tab){
 
@@ -253,20 +262,12 @@ function changePriority(element) {
     });
 }
 
-s(document).pageInit(function(){
-    s('.blockSubTabs').each(function(subTab){
-        reloadQuantityFields(subTab);
-    });
-});
-
 function reloadQuantityFields (elm) {
 
     var elmParent = s(elm).parent('template-block');
     var countBlock = s('.tab-header > span b', elmParent);
     var structureID = s('.structureID', elmParent).val();
     var entityId = s('.entityID', elmParent).val();
-
-
 
     if (structureID != undefined && entityId != undefined && structureID >= 0 && entityId >=0) {
         $.ajax({
