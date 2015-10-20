@@ -6,7 +6,6 @@ function materialTableUpdateTabs(parent, response) {
     response = s(response.table);
     s('.sub-tab-content', parent).each(function (subTab) {
         subTab.html(s('#' + subTab.a('id'), response).html());
-        initMaterialTable(subTab);
     });
     SamsonCMS_Input.update(parent);
 }
