@@ -163,7 +163,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                 if ($isRightField && (($isRightLocale) || ($isNotLocalizedField))) {
 
                     $this->headerFields[$field->id] = $field;
-                    if ($field->Type < 8) {
+                    if ($field->Type < 8 || $field->Type > 10) {
                         $input = m('samsoncms_input_application')
                             ->createFieldByType($this->dbQuery, $field->Type, $materialField);
                     }
@@ -217,6 +217,7 @@ class MaterialTableTable extends \samson\cms\table\Table
 
             // Iterate db data and perform rendering
             foreach ($dbRows as & $dbRow) {
+
                 $rows .= $this->row($dbRow, $this->pager);
             }
 
