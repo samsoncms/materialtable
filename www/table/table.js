@@ -80,11 +80,13 @@ SamsonCMS_InputMATERIAL_TABLE = function(tab) {
     initSortable(savePriority);
 };
 
+s(document).pageInit(function(){
+    SamsonCMS_InputQUANTITY();
+});
+
 // Bind input
 SamsonCMS_Input.bind(SamsonCMS_InputMATERIAL_TABLE, '.material_table_tab');
 
-// Bind input
-SamsonCMS_Input.bind(SamsonCMS_InputQUANTITY, '.material_table_tab');
 
 function updatePriorityOnChange(tab){
 
