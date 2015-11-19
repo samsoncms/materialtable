@@ -152,7 +152,8 @@ class App extends \samsoncms\Application
                 foreach ($structures as $structure) {
 
                     // If current material has incoming structure
-                    if ($structure->StructureID == $structureId) {
+                    // TODO: Sometimes array has empty values not object - needs to checked
+                    if (isset($structure->StructureID) && ($structure->StructureID == $structureId)) {
 
                         /** @var \samson\social\Core $socialModule Social module object */
                         $socialModule = m('social');
