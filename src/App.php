@@ -25,21 +25,28 @@ class App extends \samsoncms\Application
     {
         Event::subscribe('samsoncms.input.material.confirm', array($this, 'inputConfirm'));
         Event::subscribe('samsoncms.material.form.created', array($this, 'tabBuilder'));
+
+        return parent::prepare($params);
     }
 
     public function tabBuilder(\samsoncms\app\material\form\Form & $form)
     {
-        $cmsMat = dbQuery('\samson\cms\CMSMaterial')
-            ->join('structurematerial')
-            ->join('\samson\cms\Navigation')
+        /** @var \samsoncms\api\Material $material Material instance */
+        $material = null ;
+        if ($this->query->entity('\samson\cms\CMSMaterial')
             ->cond('MaterialID', $form->entity->id)
-            ->first();
-
-        if (isset($cmsMat['onetomany']) && isset($cmsMat['onetomany']['_structure'])) {
-            foreach ($cmsMat['onetomany']['_structure'] as $structure) {
-                if ($structure->type == 2) {
-                    $form->tabs[] = new MaterialTable($this, dbQuery(''), $cmsMat, $structure);
-
+            ->first($material)) {
+            /**@var array $structureIDs Try to get related structures to this material */
+            $structureIDs = array();
+            if ($this->query->entity('\samson\activerecord\structurematerial')
+                ->cond('MaterialID', $material->id)
+                ->fields('StructureID', $structureIDs)) {
+                /** @var \samsoncms\api\Navigation $navigationTable Try to get navigation table records */
+                foreach ($this->query->entity('\samson\cms\Navigation')
+                    ->cond('StructureID', $structureIDs)
+                    ->cond('Type', 2)
+                    ->exec() as $navigationTable) {
+                    $form->tabs[] = new MaterialTable($this, $this->query, $material, $navigationTable);
                 }
             }
         }
@@ -52,7 +59,6 @@ class App extends \samsoncms\Application
         $material->Active = 1;
         $material->save();
     }
-
 
     /**
      * Get max priority by current structure
