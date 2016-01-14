@@ -149,7 +149,8 @@ class App extends \samsoncms\Application
         if ($this->query->className('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
 
             /** @var array $structures Array of structures of this material */
-            $structures = $material->cmsnavs();
+            $structureIds = $this->query->className('structurematerial')->cond('MaterialID', $material->id)->fields('StructureID');
+            $structures = $this->query->className('structure')->cond('StructureID', $structureIds)->exec();
 
             // If there are some structures
             if (!empty($structures)) {

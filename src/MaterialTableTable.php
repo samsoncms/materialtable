@@ -163,7 +163,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                 if ($isRightField && (($isRightLocale) || ($isNotLocalizedField))) {
 
                     $this->headerFields[$field->id] = $field;
-                    if ($field->Type < 8 || $field->Type > 10) {
+                    if ($field->Type < 9 || $field->Type > 10) {
                         $input = m('samsoncms_input_application')
                             ->createFieldByType($this->dbQuery, $field->Type, $materialField);
                     }
@@ -172,7 +172,10 @@ class MaterialTableTable extends \samson\cms\table\Table
                         /** @var \samsoncms\input\select\Select $input Select input type */
                         $input->build($field->Value);
                     }
-
+                    
+                    // When render the input of table then call all subscribers
+                    \samsonphp\event\Event::fire('samson.cms.input.table.render', array($input));
+                    
                     // Set HTML row code
                     $tdHTML .= $this->renderModule->view('table/tdView')->set($input, 'input')->output();
                     break;
