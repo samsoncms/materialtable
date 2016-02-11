@@ -1,8 +1,8 @@
 <div class="table2-row" row_id="<?php v('materialID') ?>">
     <?php iv('td_view') ?>
     <div class="table2-col">
-        <a href="<?php url_base('material_table/delete', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="icon2 icon_16x16 icon-delete delete_table_material" title="<?php t('Удалить') ?>"> </a>
-        <a href="<?php url_base('material_table/copy', 'materialID', 'material_table/table', 'parentID', 'structureId') ?>" class="icon2 icon_16x16 icon2-copy copy_table_material" title="<?php t('Копировать') ?>"> </a>
+        <a href="<?php url_base('material_table/delete', 'materialID', '__async_table', 'parentID', 'structureId') ?>" class="icon2 icon_16x16 icon-delete delete_table_material" title="<?php t('Удалить') ?>"> </a>
+        <a href="<?php url_base('material_table/copy', 'materialID', '__async_table', 'parentID', 'structureId') ?>" class="icon2 icon_16x16 icon2-copy copy_table_material" title="<?php t('Копировать') ?>"> </a>
         <span style="float: right;" data-href="<?php url_base('material_table/priority') ?>" data-material="<?php iv('materialID'); ?>"  class="icon2 icon_16x16 icon2-arrows priority_table_material" title="<?php t('Приоритет') ?>" data-priority="<?php iv('priority');?>"><?php iv('priority');?></span>
     </div>
 </div>

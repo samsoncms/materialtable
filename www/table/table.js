@@ -25,7 +25,7 @@ function bindButtons(tab, response) {
         s('._sjsselect_dropdown li', el.prev()).each(function(li) {
             if (!li.hasClass('selectify-loaded')) {
                 li.click(function(li) {
-                    s.ajax(el.a('data-href-add') + '/' + li.a('value'), function(response) {
+                    s.ajax(el.a('data-href-add') + '/' + li.a('value') + '/', function(response) {
                         initLinks(el.prev());
                     });
                     li.addClass('selectify-loaded');
@@ -37,7 +37,7 @@ function bindButtons(tab, response) {
             s('._sjsselect ._sjsselect_delete', block).each(function(link) {
                 if (!link.hasClass('selectify-loaded')) {
                     link.click(function(link) {
-                        s.ajax(select.a('data-href-remove') + '/' + link.a('value'), function(response) {
+                        s.ajax(select.a('data-href-remove') + '/' + link.a('value') + '/', function(response) {
                         });
                         link.addClass('selectify-loaded');
                     });
@@ -50,19 +50,22 @@ function bindButtons(tab, response) {
 
 function initMaterialTable(tab) {
     s('.delete_table_material', tab).ajaxClick(function (response) {
-        bindButtons(tab, response);
+        materialTableUpdateTabs(tab.parent(), response);
+        loader.hide();
     }, function () {
         loader.show('', true);
         return true;
     });
     s('.material_table_add', tab).ajaxClick(function (response) {
-        bindButtons(tab, response);
+        materialTableUpdateTabs(tab.parent(), response);
+        loader.hide();
     }, function () {
         loader.show('', true);
         return true;
     });
     s('.copy_table_material', tab).ajaxClick(function (response) {
-        bindButtons(tab, response);
+        materialTableUpdateTabs(tab.parent(), response);
+        loader.hide();
     }, function () {
         loader.show('', true);
         return true;
