@@ -138,9 +138,12 @@ class App extends \samsoncms\Application
      * Creating new material table row
      * @param int $materialId Current material identifier
      * @param int $structureId Current table structure identifier
+     * @param $afterAction
+     * @param $afterMaterialId
+     * @param $afterStructureId
      * @return array AJAX response
      */
-    public function __async_add($materialId, $structureId)
+    public function __async_add($materialId, $structureId, $afterAction, $afterMaterialId, $afterStructureId)
     {
         /** @var \samson\cms\CMSMaterial $material Current material object */
         $material = null;
@@ -194,9 +197,12 @@ class App extends \samsoncms\Application
                     }
                 }
 
+                $result = $this->__async_table($afterMaterialId, $afterStructureId);
+
                 Event::fire('samson.cms.web.materialtable.add', array($material->id, $structureId));
                 // Set success status and return result
-                return array('status' => 1);
+//                return array('status' => 1);
+                return $result;
             }
         }
         // Set fail status and return result
@@ -206,9 +212,12 @@ class App extends \samsoncms\Application
     /**
      * Controller for deleting row from material table
      * @param string $id Table material identifier
+     * @param $afterAction
+     * @param $afterMaterialId
+     * @param $afterStructureId
      * @return array Async response array
      */
-    public function __async_delete($id)
+    public function __async_delete($id, $afterAction, $afterMaterialId, $afterStructureId)
     {
         /** @var array $result Async response */
         $result = array( 'status' => false );
@@ -223,7 +232,9 @@ class App extends \samsoncms\Application
 
             Event::fire('samson.cms.web.materialtable.delete', array($material->parent_id));
             // Set success status
-            $result['status'] = true;
+//            $result['status'] = true;
+
+            $result = $this->__async_table($afterMaterialId, $afterStructureId);
         }
         // Return result
         return $result;
@@ -232,9 +243,12 @@ class App extends \samsoncms\Application
     /**
      * Controller for copying row from material table
      * @param string $id Table material identifier
+     * @param $afterAction
+     * @param $afterMaterialId
+     * @param $afterStructureId
      * @return array Async response array
      */
-    public function __async_copy($id)
+    public function __async_copy($id, $afterAction, $afterMaterialId, $afterStructureId)
     {
         /** @var array $result Async response */
         $result = array( 'status' => false );
@@ -250,6 +264,8 @@ class App extends \samsoncms\Application
             $copy->save();
             // Set success status
             $result['status'] = true;
+
+            $result = $this->__async_table($afterMaterialId, $afterStructureId);
         }
         // Return result
         return $result;
