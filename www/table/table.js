@@ -83,10 +83,6 @@ SamsonCMS_InputMATERIAL_TABLE = function(tab) {
     initSortable(savePriority);
 };
 
-s(document).pageInit(function(){
-    SamsonCMS_InputQUANTITY();
-});
-
 // Bind input
 SamsonCMS_Input.bind(SamsonCMS_InputMATERIAL_TABLE, '.material_table_tab');
 
@@ -277,26 +273,24 @@ function reloadQuantityFields (elm) {
     var entityId = s('.entityID', elmParent).val();
 
     if (structureID != undefined && entityId != undefined && structureID >= 0 && entityId >=0) {
-        $.ajax({
-            url: '/cms/material_table/quantityFieldsRow/' + structureID + '/' +entityId,
-            type: 'POST',
-            async: true,
-            headers: {
-                'SJSAsync': 'true'
-            },
-            success: function (data) {
+
+        s.ajax('/cms/material_table/quantityFieldsRow/' + structureID + '/' +entityId, function(data){
+            try {
                 data = JSON.parse(data);
                 if (data['result'] = 1) {
-                    if (data['countOfFields'] <= 0) {
+                    if (data['countOfFields'] < 0) {
                         countBlock.html('');
                     } else {
-                        countBlock.html('('+data['countOfFields']+')');
+                        countBlock.html('(' + data['countOfFields'] + ')');
                     }
                 } else {
                     console.log('BAD request');
                 }
+            } catch (e) {
+                console.log(e.toString());
             }
         });
+
     } else {
         console.log('BAD request');
     }

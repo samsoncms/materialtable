@@ -1,2 +1,4 @@
-<span class="<?php iv('headUrl') ?>" data-current-locale="<?php echo locale() ?>"><?php iv('headName') ?> <b></b></span>
+<span class="<?php iv('headUrl') ?>" data-current-locale="<?php echo locale() ?>">
+    <?=$headName ?> <?php if ($subTabsCount):?><b>(<?= $subTabsCount ?>)</b><?php endif ?>
+</span>
 <div class="blockSubTabs"></div>
