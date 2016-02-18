@@ -10,7 +10,11 @@ namespace samson\cms\web\materialtable\tab;
 
 
 use samson\cms\Navigation;
+use samson\cms\web\materialtable\MaterialTableTable;
 use samson\core\SamsonLocale;
+use samsoncms\api\Material;
+use samsoncms\api\NavigationField;
+use samsoncms\api\NavigationMaterial;
 use samsoncms\form\tab\Generic;
 use samsonframework\core\RenderInterface;
 use samsonframework\orm\QueryInterface;
@@ -26,6 +30,12 @@ class MaterialTable extends Generic
     /** @var Navigation Current tab navigation object  */
     protected $structure;
 
+    /** @var Record Current entity */
+    protected $entity;
+
+    /** @var Record count */
+    protected $size;
+
     /** @var string path to tab header view */
     public $headerContentView = 'table/header/content';
 
@@ -35,10 +45,34 @@ class MaterialTable extends Generic
         $this->name = $structure->Name;
         $this->id .= $structure->Url != '' ? '_'.$structure->Url : '_'.$structure->Name;
         $this->structure = $structure;
+        $this->entity = $entity;
+
+
+        $rows = $query->entity(Material::class)
+            ->where(Material::F_PARENT, $entity->id)
+            ->where(Material::F_DELETION, true)
+            ->fields(Material::F_PRIMARY);
+
+        if (count($rows)) {
+            $this->size = $query->entity(NavigationMaterial::class)
+                ->where(NavigationMaterial::F_MATERIALID, $rows)
+                ->where(NavigationMaterial::F_STRUCTUREID, $structure->id)
+                ->where(NavigationMaterial::F_ACTIVE, true)
+                ->count();
+        }
 
         // Get data about current tab
-        $fieldWithMaterialCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_Type', 6)->count();
-        $localizedFieldsCount = dbQuery('structurefield')->join('field')->cond('StructureID', $this->structure->id)->cond('field_local', 1)->count();
+        $fieldWithMaterialCount = $query->entity(NavigationField::class)
+            ->join('field')
+            ->where('field_Type', 6)
+            ->where(NavigationField::F_STRUCTURE, $this->structure->id)
+            ->count();
+
+        $localizedFieldsCount = $query->entity(NavigationField::class)
+            ->join('field')
+            ->where('field_local', 1)
+            ->where(NavigationField::F_STRUCTURE, $this->structure->id)
+            ->count();
 
         // If in this tab exists only material type field or don't exists localized fields
         if ($fieldWithMaterialCount > 0 || ($localizedFieldsCount == 0)) {
@@ -72,5 +106,35 @@ class MaterialTable extends Generic
         }
 
         return $this->renderer->view($this->contentView)->content($content)->output();
+    }
+
+    /**
+     * Tab header rendering method
+     * @return mixed Tab header view
+     */
+    public function header()
+    {
+        /** @var string $tabHeader Header html view */
+        $tabSubHeader = '';
+
+        // Set content of header view
+        $tabHeader = $this->renderer->view($this->headerContentView)
+            ->headName(t($this->name, true))
+            ->headUrl('#'.$this->id)
+            ->set($this->size, 'subTabsCount')
+            ->output();
+
+        // If tab has sub tabs
+        if (count($this->subTabs) > 1) {
+            // Render header of each sub tab inside parent tab
+            foreach ($this->subTabs as $tab) {
+                $tabSubHeader .= $tab->header();
+            }
+        }
+
+        return $this->renderer->view($this->headerIndexView)
+            ->tabHeader($tabHeader)
+            ->tabSubHeader($tabSubHeader)
+            ->output();
     }
 }
