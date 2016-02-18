@@ -386,10 +386,10 @@ class App extends \samsoncms\Application
             // Or if locale is set and localized flag is true
             // Render table to get it's HTML code
             //if (($locale == '' && $all) || ($locale != '' && $multilingual)) {
-                return m('material_table')->view('tab_view')
-                    ->set('table', $table->render())
-                    ->set('materialId', $materialId)
-                    ->set('structureId', $structure->StructureID)
+                return $this->view('tab_view')
+                    ->set($table->render(), 'table')
+                    ->set($materialId, 'materialId')
+                    ->set($structure->StructureID, 'structureId')
                     ->output();
             //}
         }
