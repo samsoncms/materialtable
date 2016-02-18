@@ -1,11 +1,11 @@
 <div class="table2 default custom-table2 material_table_table">
     <div class="table2-row table2-header-row">
-        <?php v('thView') ?>
+        <?= $thView ?>
         <div class="table2-col table2-header-col">
             <?php t('Управление') ?>
         </div>
     </div>
     <div class="table2-body" __action_priority="<?php url_base('material_table', 'priority') ?>">
-        <?php v('rows'); ?>
+        <?= $rows?>
     </div>
 </div>

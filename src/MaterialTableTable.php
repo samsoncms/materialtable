@@ -187,11 +187,11 @@ class MaterialTableTable extends \samson\cms\table\Table
         return $this->renderModule
             ->view($this->row_tmpl)
             ->set(m('samsoncms_input_text_application')->createField($this->dbQuery, $material, 'Url'), 'materialName')
-            ->set('materialID', $material->id)
-            ->set('priority', $material->priority)
-            ->set('parentID', $material->parent_id)
-            ->set('structureId', $this->structure->StructureID)
-            ->set('td_view', $tdHTML)
+            ->set($material->id, 'materialID')
+            ->set($material->priority, 'priority')
+            ->set($material->parent_id, 'parentID')
+            ->set($this->structure->StructureID, 'structureId')
+            ->set($tdHTML, 'td_view')
             ->set($pager, 'pager')
             ->output();
     }
@@ -241,7 +241,7 @@ class MaterialTableTable extends \samson\cms\table\Table
                 $description .= " [".t('Общие', true)."]";
             }
 
-            $thHTML .= $this->renderModule->view('table/thView')->set('fieldName', $description)->output();
+            $thHTML .= $this->renderModule->view('table/thView')->set($description, 'fieldName')->output();
         }
 
         // Get all table materials
@@ -264,9 +264,9 @@ class MaterialTableTable extends \samson\cms\table\Table
             // Render table view
             return $this->renderModule
                 ->view($this->table_tmpl)
-                ->set('thView', $thHTML)
+                ->set($thHTML, 'thView')
                 ->set($this->pager)
-                ->set('rows', $rows)
+                ->set($rows, 'rows')
                 ->output();
         } else {
             return '';
