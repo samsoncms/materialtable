@@ -7,7 +7,9 @@
         "samsonos/cms_table":"*",
         "samsoncms/material":"*"
     },
-	"minimum-stability":"dev",
+    "require":{
+        "samsonos/cms_app_materialtable":"*"
+    },
     "license":"Open Software License (OSL) v 3.0",
     "homepage":"http://samsonos.com/",
     "autoload": {
