@@ -7,7 +7,7 @@
         "samsonos/cms_table":"*",
         "samsoncms/material":"*"
     },
-    "require":{
+    "replace":{
         "samsonos/cms_app_materialtable":"*"
     },
     "license":"Open Software License (OSL) v 3.0",
