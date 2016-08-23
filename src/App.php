@@ -33,7 +33,7 @@ class App extends \samsoncms\Application
     {
         /** @var \samsoncms\api\Material $material Material instance */
         $material = null ;
-        if ($this->query->entity('\samson\cms\CMSMaterial')
+        if ($this->query->entity('\samsoncms\api\Material')
             ->cond('MaterialID', $form->entity->id)
             ->first($material)) {
             /**@var array $structureIDs Try to get related structures to this material */
@@ -42,7 +42,7 @@ class App extends \samsoncms\Application
                 ->cond('MaterialID', $material->id)
                 ->fields('StructureID', $structureIDs)) {
                 /** @var \samsoncms\api\Navigation $navigationTable Try to get navigation table records */
-                foreach ($this->query->entity('\samson\cms\Navigation')
+                foreach ($this->query->entity('\samsoncms\api\Navigation')
                     ->cond('StructureID', $structureIDs)
                     ->cond('Type', 2)
                     ->exec() as $navigationTable) {
@@ -145,11 +145,11 @@ class App extends \samsoncms\Application
      */
     public function __async_add($materialId, $structureId, $afterAction, $afterMaterialId, $afterStructureId)
     {
-        /** @var \samson\cms\CMSMaterial $material Current material object */
+        /** @var \samsoncms\api\Material $material Current material object */
         $material = null;
 
         // If there are no such row yet
-        if ($this->query->className('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
+        if ($this->query->className('\samsoncms\api\Material')->cond('MaterialID', $materialId)->first($material)) {
 
             /** @var array $structures Array of structures of this material */
             $structureIds = $this->query->className('structurematerial')->cond('MaterialID', $material->id)->fields('StructureID');
@@ -158,7 +158,7 @@ class App extends \samsoncms\Application
             // If there are some structures
             if (!empty($structures)) {
 
-                /** @var \samson\cms\Navigation $structure Table structure */
+                /** @var \samsoncms\api\Navigation $structure Table structure */
                 foreach ($structures as $structure) {
 
                     // If current material has incoming structure
@@ -173,8 +173,8 @@ class App extends \samsoncms\Application
                         // Get max priority of this structure
                         $maxPriority = $this->getMaxPriority($materialId, $structureId);
 
-                        /** @var \samson\cms\CMSMaterial $tableMaterial New table material (table row) */
-                        $tableMaterial = new \samson\cms\CMSMaterial(false);
+                        /** @var \samsoncms\api\Material $tableMaterial New table material (table row) */
+                        $tableMaterial = new \samsoncms\api\Material(false);
                         $tableMaterial->type = 3;
                         $tableMaterial->Name = $structure->Name;
                         $tableMaterial->Url = $structure->Name . '-' . md5(date('Y-m-d-h-i-s'));
@@ -222,11 +222,11 @@ class App extends \samsoncms\Application
         /** @var array $result Async response */
         $result = array( 'status' => false );
 
-        /** @var \samson\cms\CMSMaterial $material */
+        /** @var \samsoncms\api\Material $material */
         $material = null;
 
         // If such material exists
-        if ($this->query->className('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+        if ($this->query->className('\samsoncms\api\Material')->id($id)->first($material)) {
             // Delete this table material with it's all relations to structures and fields
             $material->deleteWithRelations();
 
@@ -253,13 +253,13 @@ class App extends \samsoncms\Application
         /** @var array $result Async response */
         $result = array( 'status' => false );
 
-        /** @var \samson\cms\CMSMaterial $material */
+        /** @var \samsoncms\api\Material $material */
         $material = null;
 
         // If such material exists
-        if ($this->query->className('\samson\cms\CMSMaterial')->id($id)->first($material)) {
+        if ($this->query->className('\samsoncms\api\Material')->id($id)->first($material)) {
             // Make copy of this material
-            /** @var \samson\cms\CMSMaterial $copy Copy of existing material */
+            /** @var \samsoncms\api\Material $copy Copy of existing material */
             $copy = $material->copy();
             $copy->save();
             // Set success status
@@ -282,14 +282,14 @@ class App extends \samsoncms\Application
         /** @var array $result Asynchronous response */
         $result = array('status' => false);
 
-        /** @var \samson\cms\Navigation $structure Current table structure */
-        $structure = $this->query->className('\samson\cms\Navigation')->cond('StructureID', $structureId)->first();
+        /** @var \samsoncms\api\Navigation $structure Current table structure */
+        $structure = $this->query->className('\samsoncms\api\Navigation')->cond('StructureID', $structureId)->first();
         $material = $this->query->className('\samson\cms\Material')->cond('MaterialID', $materialId)->first();
 
         // If such structure exists
         if (isset($structureId)) {
             /** @var MaterialTableTabLocalized $tab New tab with updated table */
-            $tab = new MaterialTable($this, $this->query->className('\samson\cms\CMSMaterial'), $material, $structure);
+            $tab = new MaterialTable($this, $this->query->className('\samsoncms\api\Material'), $material, $structure);
 
             // Get HTML code of this tab
             $content = $tab->content();
@@ -338,17 +338,17 @@ class App extends \samsoncms\Application
     /**
      * Function to generate new table
      * @param int $materialId Current material identifier
-     * @param \samson\cms\Navigation $structure Current table structure
+     * @param \samsoncms\api\Navigation $structure Current table structure
      * @param string $locale Current locale
      * @return string Generated table HTML
      */
     public function getMaterialTableTable($materialId, $structure, $locale = '')
     {
-        /** @var \samson\cms\CMSMaterial $material Current material object */
+        /** @var \samsoncms\api\Material $material Current material object */
         $material = null;
 
         // If material was found by identifier
-        if ($this->query->className('\samson\cms\CMSMaterial')->cond('MaterialID', $materialId)->first($material)) {
+        if ($this->query->className('\samsoncms\api\Material')->cond('MaterialID', $materialId)->first($material)) {
 
             /** @var MaterialTableTable $table Current table object */
             $table = new MaterialTableTable($material, null, $structure, $locale);

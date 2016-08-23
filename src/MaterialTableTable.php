@@ -30,7 +30,7 @@ class MaterialTableTable extends \samson\cms\table\Table
     /** Pointer to CMSMaterial */
     private $material;
 
-    /** @var \samson\cms\Navigation Pointer to current table structure */
+    /** @var \samsoncms\api\Navigation Pointer to current table structure */
     private $structure;
 
     /** Fields locale */
@@ -41,12 +41,12 @@ class MaterialTableTable extends \samson\cms\table\Table
 
     /**
      * Constructor
-     * @param \samson\cms\CMSMaterial $material Current material object
+     * @param \samsoncms\api\Material $material Current material object
      * @param Pager $pager Pager object
-     * @param \samson\cms\Navigation Current table structure object
+     * @param \samsoncms\api\Navigation Current table structure object
      * @param string $locale Locale string
      */
-    public function __construct(\samson\cms\CMSMaterial & $material, Pager $pager = null, $structure, $locale = 'ru')
+    public function __construct(\samsoncms\api\Material & $material, Pager $pager = null, $structure, $locale = 'ru')
     {
         $this->dbQuery = new dbQuery();
         // Retrieve pointer to current module for rendering
@@ -275,7 +275,7 @@ class MaterialTableTable extends \samson\cms\table\Table
 
     public function addEmptyRow()
     {
-        /** @var \samson\cms\CMSMaterial $defaultMaterial */
+        /** @var \samsoncms\api\Material $defaultMaterial */
         $defaultMaterial = null;
 
         if (!dbQuery('material')->cond('parent_id', $this->material->id)->cond('type', 3)->cond('Active', 2)->first()) {
