@@ -9,7 +9,7 @@
 namespace samson\cms\web\materialtable\tab;
 
 
-use samson\cms\Navigation;
+use samsoncms\api\Navigation;
 use samson\cms\web\materialtable\MaterialTableTable;
 use samson\core\SamsonLocale;
 use samsoncms\api\Material;
