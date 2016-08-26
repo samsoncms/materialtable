@@ -1,6 +1,7 @@
 <?php
 namespace samson\cms\web\materialtable;
 use samson\cms\web\materialtable\tab\MaterialTable;
+use samsoncms\api\NavigationMaterial;
 use samsoncms\app\material\Form;
 use samsonphp\event\Event;
 
@@ -359,10 +360,10 @@ class App extends \samsoncms\Application
             $multilingual = false;
 
             // If there is relation between current material and current table structure
-            if ($this->query->className('\samson\cms\CMSNavMaterial')
-                ->cond('MaterialID', $materialId)
+            if ($this->query->className(NavigationMaterial::class)
+                ->where('MaterialID', $materialId)
                 ->join('structure')
-                ->cond('StructureID', $structure->StructureID)
+                ->where('StructureID', $structure->StructureID)
                 ->first()
             ) {
 
