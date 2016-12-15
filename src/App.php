@@ -4,6 +4,7 @@ use samson\cms\web\materialtable\tab\MaterialTable;
 use samsoncms\api\NavigationMaterial;
 use samsoncms\app\material\Form;
 use samsonphp\event\Event;
+use Symfony\Component\DependencyInjection\Tests\Compiler\C;
 
 /**
  * Created by Maxim Omelchenko <omelchenko@samsonos.com>
@@ -190,7 +191,8 @@ class App extends \samsoncms\Application
 
                         /** @var \samson\cms\CMSNavMaterial $structureMaterial Relation between created table material
                          * and table structure */
-                        $structureMaterial = new \samson\cms\CMSNavMaterial(false);
+//                        $structureMaterial = new \samson\cms\CMSNavMaterial(false);
+                        $structureMaterial = new \samsoncms\api\NavigationMaterial();
                         $structureMaterial->StructureID = $structureId;
                         $structureMaterial->MaterialID  = $tableMaterial->MaterialID;
                         $structureMaterial->Active = 1;
@@ -229,7 +231,8 @@ class App extends \samsoncms\Application
         // If such material exists
         if ($this->query->className('\samsoncms\api\Material')->id($id)->first($material)) {
             // Delete this table material with it's all relations to structures and fields
-            $material->deleteWithRelations();
+//            $material->deleteWithRelations();
+            $material->remove();
 
             Event::fire('samson.cms.web.materialtable.delete', array($material->parent_id));
             // Set success status
@@ -285,7 +288,7 @@ class App extends \samsoncms\Application
 
         /** @var \samsoncms\api\Navigation $structure Current table structure */
         $structure = $this->query->className('\samsoncms\api\Navigation')->cond('StructureID', $structureId)->first();
-        $material = $this->query->className('\samson\cms\Material')->cond('MaterialID', $materialId)->first();
+        $material = $this->query->className(\samsoncms\api\Material::class)->cond('MaterialID', $materialId)->first();
 
         // If such structure exists
         if (isset($structureId)) {
